@@ -1,0 +1,87 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribuição / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Arquivos de configuração local
+.env
+.env.*
+!.env.example
+
+# Configurações do Flask
+instance/
+.webassets-cache
+
+# Banco de dados local
+*.sqlite
+*.sqlite3
+*.db
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Arquivos temporários
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# VS Code / IDEs
+.vscode/
+.idea/
+
+# Dados locais de projetos de Ciência de Dados
+data/raw/
+data/processed/
+data/interim/
+datasets/
+
+# Modelos treinados e artefatos de Machine Learning
+models/
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.keras
+*.pt
+*.pth
+*.onnx
+
+# Saídas de experimentos
+runs/
+mlruns/
+outputs/
+reports/figures/
+
+# Arquivos grandes ou exportados
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.feather
+
+# Mas permite exemplos pequenos, se você quiser versionar
+!data/examples/
+!data/examples/*.csv
+!data/examples/*.xlsx
+
+# Arquivos de teste/cobertura
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Arquivos do sistema
+desktop.ini

@@ -1,0 +1,120 @@
+"""
+Execute com:
+
+    python enviroment.txt
+
+Este script cria o ambiente virtual ".venv" e instala bibliotecas
+para Flask, ciência de dados e machine learning.
+"""
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+import venv
+
+
+NOME_AMBIENTE = ".venv"
+
+PACOTES = [
+    "flask",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "scipy",
+    "scikit-learn",
+    "jupyterlab",
+    "notebook",
+    "requests",
+    "sqlalchemy",
+    "openpyxl",
+    "joblib",
+]
+
+
+def executar(comando):
+    print("\nExecutando:")
+    print(" ".join(map(str, comando)))
+    subprocess.run(comando, check=True)
+
+
+def obter_python_venv(pasta):
+    if os.name == "nt":
+        return pasta / "Scripts" / "python.exe"
+    return pasta / "bin" / "python"
+
+
+def criar_ambiente():
+    pasta = Path(NOME_AMBIENTE)
+
+    if not pasta.exists():
+        print(f'Criando o ambiente virtual "{NOME_AMBIENTE}"...')
+        venv.create(pasta, with_pip=True)
+    else:
+        print(f'O ambiente virtual "{NOME_AMBIENTE}" já existe.')
+
+    python_venv = obter_python_venv(pasta)
+
+    if not python_venv.exists():
+        raise FileNotFoundError(
+            "O Python do ambiente virtual não foi encontrado. "
+            'Apague a pasta ".venv" e execute este arquivo novamente.'
+        )
+
+    # Recupera ou reinstala o pip caso a tentativa anterior tenha sido interrompida.
+    print("\nVerificando o pip...")
+    executar([
+        str(python_venv),
+        "-m",
+        "ensurepip",
+        "--upgrade",
+    ])
+
+    # Não atualiza o pip separadamente para evitar problemas durante
+    # a desinstalação da versão já existente.
+    print("\nInstalando as bibliotecas. Não feche o terminal...")
+    executar([
+        str(python_venv),
+        "-m",
+        "pip",
+        "install",
+        "--prefer-binary",
+        *PACOTES,
+    ])
+
+    print("\n" + "=" * 60)
+    print("AMBIENTE CONFIGURADO COM SUCESSO!")
+    print("=" * 60)
+
+    if os.name == "nt":
+        print(r"\nPara ativar no Windows:")
+        print(r"    .venv\Scripts\activate")
+    else:
+        print("\nPara ativar no Linux ou macOS:")
+        print("    source .venv/bin/activate")
+
+    print("\nPara abrir o JupyterLab:")
+    print("    jupyter lab")
+
+    print("\nPara iniciar um projeto Flask:")
+    print("    flask --app app run --debug")
+
+
+if __name__ == "__main__":
+    try:
+        criar_ambiente()
+
+    except KeyboardInterrupt:
+        print("\n\nInstalação cancelada pelo usuário.")
+        print("Execute o arquivo novamente para continuar.")
+        sys.exit(1)
+
+    except subprocess.CalledProcessError as erro:
+        print(f"\nUm comando terminou com erro: {erro}")
+        print('Caso continue, apague a pasta ".venv" e execute novamente.')
+        sys.exit(1)
+
+    except Exception as erro:
+        print(f"\nErro: {erro}")
+        sys.exit(1)
