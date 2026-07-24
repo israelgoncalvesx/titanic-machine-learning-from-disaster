@@ -433,6 +433,12 @@ Isso verifica se todas as células funcionam quando executadas desde o início.
 
 ---
 
+## Transparência sobre o uso de Inteligência Artificial
+
+Este projeto foi desenvolvido com o **auxílio de ferramentas de Inteligência Artificial**, utilizadas como apoio para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação. A IA não realizou o projeto de forma autônoma: o código foi executado e revisado, e as decisões, interpretações e conclusões foram compreendidas e validadas pelo autor.
+
+---
+
 ## Autor
 
 **Israel Gabriel Gonçalves Almeida dos Santos**
