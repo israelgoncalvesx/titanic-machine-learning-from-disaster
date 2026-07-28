@@ -11,6 +11,8 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from src.features import criar_atributos # chama a função do arquivo features de composição familiar
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report
+from pathlib import Path
+import joblib
 
 
 #IMPORTAR DADOS
@@ -83,6 +85,16 @@ preprocessamento = ColumnTransformer(
     ]
 )
 
+#PIPELINE MODELO
+
+pipeline_modelo = Pipeline(steps=[
+    ("preprocessamento", preprocessamento),
+    (
+        "modelo",
+        LogisticRegression(max_iter=1000),
+    ),
+]
+)
 
 print("Dados de treino:")
 print("X_treino:", X_treino.shape)
@@ -93,19 +105,15 @@ print("X_validacao:", X_validacao.shape)
 print("y_validacao:", y_validacao.shape)
 
 
-X_treino_preparado = preprocessamento.fit_transform(X_treino) #aprender a tratar os dados
+#TREINAMENTO DA PIPELINE
 
-X_validacao_preparado = preprocessamento.transform( #aplicar o tratamento aprendido
-    X_validacao
+pipeline_modelo.fit(
+    X_treino,
+    y_treino
 )
 
-modelo = LogisticRegression(max_iter=1000) #Criar modelo
 
-#Treinar o modelo
-
-modelo.fit(X_treino_preparado, y_treino)
-
-previsoes = modelo.predict(X_validacao_preparado)
+previsoes = pipeline_modelo.predict(X_validacao)
 
 
 acuracia = accuracy_score(
@@ -113,16 +121,21 @@ acuracia = accuracy_score(
     previsoes
 )
 
+#SALVAR PIPELINE
+pasta_modelos = Path("models")
+pasta_modelos.mkdir(exist_ok=True)
+
+caminho_modelo = pasta_modelos / "titanic_pipeline.joblib"
+
+joblib.dump(pipeline_modelo, caminho_modelo)
+
+print(f"\nPipeline salvo em: {caminho_modelo}")
+
+
 
 
 print("\nFormato antes do tratamento:")
 print(X_treino.shape)
-
-print("\nFormato depois do tratamento:")
-print(X_treino_preparado.shape)
-
-print("\nFormato da validação preparada:")
-print(X_validacao_preparado.shape)
 
 print("\nPrimeiras previsões:")
 print(previsoes[:10])
@@ -150,6 +163,7 @@ print(
 print("\nConclusão:")
 print("O modelo obteve 81,56% de acurácia.")
 print("O principal ponto de melhoria é o recall dos sobreviventes: 68%.")
+
 
 #MATRIZ DE CONFUSÃO
 
