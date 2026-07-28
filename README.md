@@ -32,6 +32,8 @@ Avaliação
   ↓
 Modelo salvo
   ↓
+Script de previsão
+  ↓
 API de previsão
   ↓
 Testes e Docker
@@ -51,6 +53,7 @@ Além da previsão, o projeto busca praticar:
 - treinamento e avaliação de modelos;
 - organização de código Python fora do notebook;
 - criação de um processo de treinamento reproduzível;
+- persistência e reutilização de modelos treinados;
 - disponibilização futura do modelo por meio de uma API;
 - testes automatizados e conteinerização.
 
@@ -180,6 +183,8 @@ O conjunto `train.csv` foi dividido em:
 
 O parâmetro `stratify=y` mantém proporções semelhantes de sobreviventes e não sobreviventes nas duas partes.
 
+O pré-processamento e a Regressão Logística foram reunidos em um único objeto `Pipeline`. Dessa forma, o mesmo tratamento aprendido durante o treinamento será aplicado automaticamente aos dados utilizados em previsões futuras.
+
 ## Resultados do modelo
 
 A Regressão Logística obteve **81,56% de acurácia** no conjunto de validação, composto por 179 passageiros.
@@ -211,6 +216,23 @@ Os erros foram:
 
 No total, o modelo acertou 146 dos 179 casos de validação. O principal ponto de melhoria é reduzir os 22 falsos negativos da classe `Sobreviveu`.
 
+## Pipeline treinado
+
+Após o treinamento, o pipeline completo é salvo com `joblib` em:
+
+```text
+models/titanic_pipeline.joblib
+```
+
+Esse arquivo contém, em um único objeto:
+
+- preenchimento dos valores ausentes;
+- padronização das variáveis numéricas;
+- codificação das variáveis categóricas;
+- Regressão Logística treinada.
+
+Isso permite carregar o pipeline posteriormente e realizar previsões sem executar novamente todo o treinamento.
+
 ## Etapa atual
 
 O arquivo `src/train.py` já executa pelo terminal:
@@ -224,16 +246,16 @@ separação de X e y
         ↓
 divisão entre treino e validação
         ↓
-pré-processamento
+pipeline de pré-processamento e modelo
         ↓
 treinamento da Regressão Logística
         ↓
-previsões
+previsões e avaliação
         ↓
-avaliação do modelo
+salvamento com joblib
 ```
 
-A próxima etapa será unir o pré-processamento e o modelo em um único `Pipeline` e salvá-lo com `joblib`.
+A próxima etapa será criar `src/predict.py` para carregar `models/titanic_pipeline.joblib` e fazer previsões sem treinar o modelo novamente.
 
 ## Checklist do projeto
 
@@ -276,8 +298,8 @@ A próxima etapa será unir o pré-processamento e o modelo em um único `Pipeli
 - [x] Calcular e exibir acurácia
 - [x] Gerar o relatório de classificação
 - [x] Gerar e salvar a matriz de confusão
-- [ ] Unir pré-processamento e modelo em um único `Pipeline`
-- [ ] Salvar o pipeline treinado com `joblib`
+- [x] Unir pré-processamento e modelo em um único `Pipeline`
+- [x] Salvar o pipeline treinado com `joblib`
 - [ ] Criar um script para carregar o modelo e fazer previsões
 - [ ] Validar os dados recebidos para previsão
 - [ ] Criar uma API com FastAPI
@@ -310,8 +332,9 @@ titanic-machine-learning-from-disaster/
 │   └── train.py
 ├── images/
 │   └── matriz_de_confusao.png
+├── models/
+│   └── titanic_pipeline.joblib
 ├── app/                       # API em uma etapa futura
-├── models/                    # Pipeline treinado será salvo aqui
 ├── tests/                     # Testes automatizados em uma etapa futura
 ├── .gitignore
 ├── README.md
@@ -330,12 +353,12 @@ titanic-machine-learning-from-disaster/
 - NumPy
 - Matplotlib
 - Scikit-learn
+- Joblib
 - Jupyter Notebook
 - Git e GitHub
 
 Tecnologias planejadas:
 
-- Joblib
 - FastAPI
 - Pydantic
 - Pytest
@@ -389,14 +412,20 @@ Na raiz do projeto:
 python -m src.train
 ```
 
-Esse comando prepara os dados, treina o modelo e exibe as métricas de avaliação.
+Esse comando:
+
+- prepara os dados;
+- treina o pipeline;
+- exibe as métricas de avaliação;
+- mostra a matriz de confusão;
+- salva o pipeline em `models/titanic_pipeline.joblib`.
 
 ## Limitações atuais
 
 - O conjunto de dados é pequeno;
 - a coluna `Cabin` possui muitos valores ausentes;
 - o primeiro modelo utiliza apenas uma parte das informações disponíveis;
-- o modelo ainda não foi salvo para reutilização;
+- ainda não existe um script separado para carregar o pipeline e realizar novas previsões;
 - a API, os testes e o Docker ainda não foram implementados;
 - o recall dos sobreviventes ainda pode ser melhorado;
 - o desempenho no conjunto oficial de teste depende da avaliação realizada pelo Kaggle.
