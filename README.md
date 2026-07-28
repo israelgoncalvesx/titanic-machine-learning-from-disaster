@@ -197,7 +197,7 @@ Para os sobreviventes, o recall foi de **68%**, indicando que o modelo ainda pos
 
 A matriz de confusão mostra os acertos e erros do modelo no conjunto de validação:
 
-![Matriz de confusão do modelo](images/Matriz_de_Confusão.png)
+![Matriz de confusão do modelo](images/matriz_de_confusao.png)
 
 O modelo classificou corretamente:
 
@@ -309,7 +309,7 @@ titanic-machine-learning-from-disaster/
 │   ├── features.py
 │   └── train.py
 ├── images/
-│   └── Matriz_de_Confusão.png
+│   └── matriz_de_confusao.png
 ├── app/                       # API em uma etapa futura
 ├── models/                    # Pipeline treinado será salvo aqui
 ├── tests/                     # Testes automatizados em uma etapa futura
