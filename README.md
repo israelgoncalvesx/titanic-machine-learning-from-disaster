@@ -7,7 +7,7 @@
 
 > 🚧 **Projeto em desenvolvimento**
 >
-> Este projeto está sendo construído de forma gradual, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma aplicação organizada, reproduzível e preparada para receber uma API.
+> Este projeto está sendo construído gradualmente, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma aplicação organizada, reproduzível e preparada para receber uma API.
 
 ## Sobre o projeto
 
@@ -82,8 +82,6 @@ Os dados utilizados neste projeto foram obtidos no Kaggle:
 
 **Dataset utilizado:** [Titanic: Machine Learning from Disaster](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
 
-O conjunto contém informações como idade, sexo, classe da passagem, tarifa, familiares a bordo e situação de sobrevivência dos passageiros.
-
 O projeto utiliza os seguintes arquivos:
 
 | Arquivo | Finalidade |
@@ -94,9 +92,9 @@ O projeto utiliza os seguintes arquivos:
 ### Como obter os dados
 
 1. Acesse a página do dataset no Kaggle;
-2. entre em sua conta do Kaggle;
+2. entre em sua conta;
 3. faça o download dos arquivos;
-4. extraia o conteúdo baixado;
+4. extraia o conteúdo;
 5. coloque `train.csv` e `test.csv` dentro da pasta `data/`.
 
 Os caminhos esperados são:
@@ -138,27 +136,104 @@ FamilySize = SibSp + Parch + 1
 
 O número `1` representa o próprio passageiro.
 
-A criação dessas características foi retirada do notebook e colocada em `src/features.py`, permitindo que a mesma transformação seja reutilizada no treinamento, nas previsões e, futuramente, na API.
+A criação dessas características foi retirada do notebook e colocada em `src/features.py`, permitindo que a transformação seja reutilizada no treinamento, nas previsões e, futuramente, na API.
+
+## Pré-processamento
+
+As características foram divididas em dois grupos.
+
+### Numéricas
+
+- `Age`;
+- `SibSp`;
+- `Parch`;
+- `Fare`;
+- `FamilySize`;
+- `IsAlone`.
+
+O tratamento numérico utiliza:
+
+- `SimpleImputer` com a mediana para preencher valores ausentes;
+- `StandardScaler` para colocar as variáveis em escalas comparáveis.
+
+### Categóricas
+
+- `Pclass`;
+- `Sex`;
+- `Embarked`.
+
+O tratamento categórico utiliza:
+
+- `SimpleImputer` com a categoria mais frequente;
+- `OneHotEncoder` para converter categorias em colunas numéricas.
+
+O `ColumnTransformer` aplica o tratamento correto a cada grupo de colunas.
+
+## Modelo inicial
+
+O primeiro algoritmo utilizado foi a **Regressão Logística**, adequada para um problema de classificação binária.
+
+O conjunto `train.csv` foi dividido em:
+
+- 80% para treinamento;
+- 20% para validação.
+
+O parâmetro `stratify=y` mantém proporções semelhantes de sobreviventes e não sobreviventes nas duas partes.
+
+## Resultados do modelo
+
+A Regressão Logística obteve **81,56% de acurácia** no conjunto de validação, composto por 179 passageiros.
+
+| Classe | Precision | Recall | F1-score | Registros |
+|---|---:|---:|---:|---:|
+| Não sobreviveu | 0,82 | 0,90 | 0,86 | 110 |
+| Sobreviveu | 0,81 | 0,68 | 0,74 | 69 |
+
+O modelo apresentou melhor desempenho na identificação dos passageiros que não sobreviveram, alcançando recall de **90%** nessa classe.
+
+Para os sobreviventes, o recall foi de **68%**, indicando que o modelo ainda possui maior dificuldade para reconhecer essa classe.
+
+### Matriz de confusão
+
+A matriz de confusão mostra os acertos e erros do modelo no conjunto de validação:
+
+![Matriz de confusão do modelo](images/Matriz_de_Confusão.png)
+
+O modelo classificou corretamente:
+
+- 99 passageiros que não sobreviveram;
+- 47 passageiros que sobreviveram.
+
+Os erros foram:
+
+- 11 passageiros classificados como sobreviventes, mas que não sobreviveram;
+- 22 passageiros classificados como não sobreviventes, mas que sobreviveram.
+
+No total, o modelo acertou 146 dos 179 casos de validação. O principal ponto de melhoria é reduzir os 22 falsos negativos da classe `Sobreviveu`.
 
 ## Etapa atual
 
-O projeto está atualmente na transição entre:
+O arquivo `src/train.py` já executa pelo terminal:
 
 ```text
-modelo desenvolvido no notebook
-              ↓
-código de treinamento em arquivos Python
+carregamento dos dados
+        ↓
+engenharia de atributos
+        ↓
+separação de X e y
+        ↓
+divisão entre treino e validação
+        ↓
+pré-processamento
+        ↓
+treinamento da Regressão Logística
+        ↓
+previsões
+        ↓
+avaliação do modelo
 ```
 
-O arquivo `src/train.py` já:
-
-- carrega o `train.csv`;
-- utiliza a função de engenharia de atributos;
-- seleciona as características utilizadas pelo modelo;
-- separa `X`, com as características, e `y`, com a resposta `Survived`;
-- mostra as dimensões e as primeiras linhas dos dados.
-
-O próximo passo será dividir os dados em treino e validação dentro do script.
+A próxima etapa será unir o pré-processamento e o modelo em um único `Pipeline` e salvá-lo com `joblib`.
 
 ## Checklist do projeto
 
@@ -195,10 +270,13 @@ O próximo passo será dividir os dados em treino e validação dentro do script
 - [x] Criar o arquivo `src/train.py`
 - [x] Carregar os dados pelo script de treinamento
 - [x] Separar as características `X` e a variável-alvo `y`
-- [ ] Separar treino e validação no `src/train.py`
-- [ ] Criar o pré-processamento no script
-- [ ] Treinar o modelo pelo terminal
-- [ ] Calcular e exibir métricas pelo script
+- [x] Separar treino e validação no `src/train.py`
+- [x] Criar o pré-processamento no script
+- [x] Treinar o modelo pelo terminal
+- [x] Calcular e exibir acurácia
+- [x] Gerar o relatório de classificação
+- [x] Gerar e salvar a matriz de confusão
+- [ ] Unir pré-processamento e modelo em um único `Pipeline`
 - [ ] Salvar o pipeline treinado com `joblib`
 - [ ] Criar um script para carregar o modelo e fazer previsões
 - [ ] Validar os dados recebidos para previsão
@@ -230,6 +308,8 @@ titanic-machine-learning-from-disaster/
 │   ├── __init__.py
 │   ├── features.py
 │   └── train.py
+├── images/
+│   └── Matriz_de_Confusão.png
 ├── app/                       # API em uma etapa futura
 ├── models/                    # Pipeline treinado será salvo aqui
 ├── tests/                     # Testes automatizados em uma etapa futura
@@ -238,45 +318,10 @@ titanic-machine-learning-from-disaster/
 └── requirements.txt
 ```
 
-## Análise exploratória
+## Notebooks
 
-A análise exploratória está disponível em:
-
-[`notebooks/01_analise_exploratoria.ipynb`](notebooks/01_analise_exploratoria.ipynb)
-
-O conjunto de treino possui 891 passageiros e 12 colunas. Os principais valores ausentes estão em:
-
-| Variável | Valores ausentes | Percentual aproximado |
-|---|---:|---:|
-| `Cabin` | 687 | 77,10% |
-| `Age` | 177 | 19,87% |
-| `Embarked` | 2 | 0,22% |
-
-Entre os padrões observados na análise:
-
-- mulheres apresentaram uma taxa de sobrevivência maior que os homens;
-- passageiros da primeira classe apresentaram maior sobrevivência;
-- passageiros da terceira classe apresentaram menor sobrevivência;
-- crianças apresentaram uma taxa de sobrevivência relativamente maior;
-- tarifa e classe da passagem apresentaram relações importantes entre si.
-
-Essas relações representam associações observadas no conjunto de dados e não comprovam causalidade.
-
-## Modelo inicial
-
-O notebook de Machine Learning está disponível em:
-
-[`notebooks/02_modelo_machine_learning.ipynb`](notebooks/02_modelo_machine_learning.ipynb)
-
-O primeiro algoritmo utilizado foi a **Regressão Logística**, adequada para um problema de classificação binária.
-
-O pré-processamento utiliza:
-
-- `SimpleImputer` para valores ausentes;
-- `StandardScaler` para características numéricas;
-- `OneHotEncoder` para características categóricas;
-- `ColumnTransformer` para organizar as transformações;
-- `Pipeline` para unir o pré-processamento e o modelo.
+- [Análise exploratória](notebooks/01_analise_exploratoria.ipynb)
+- [Modelo de Machine Learning](notebooks/02_modelo_machine_learning.ipynb)
 
 ## Tecnologias utilizadas
 
@@ -336,13 +381,7 @@ data/train.csv
 data/test.csv
 ```
 
-### 5. Execute os notebooks
-
-```bash
-jupyter notebook
-```
-
-### 6. Execute o código Python atual
+### 5. Execute o treinamento
 
 Na raiz do projeto:
 
@@ -350,15 +389,16 @@ Na raiz do projeto:
 python -m src.train
 ```
 
-Atualmente, esse comando carrega a base, cria os novos atributos e separa `X` e `y`. O treinamento completo pelo terminal será implementado nas próximas etapas.
+Esse comando prepara os dados, treina o modelo e exibe as métricas de avaliação.
 
 ## Limitações atuais
 
 - O conjunto de dados é pequeno;
 - a coluna `Cabin` possui muitos valores ausentes;
 - o primeiro modelo utiliza apenas uma parte das informações disponíveis;
-- o treinamento completo ainda está concentrado no notebook;
+- o modelo ainda não foi salvo para reutilização;
 - a API, os testes e o Docker ainda não foram implementados;
+- o recall dos sobreviventes ainda pode ser melhorado;
 - o desempenho no conjunto oficial de teste depende da avaliação realizada pelo Kaggle.
 
 ## Transparência sobre o uso de Inteligência Artificial
