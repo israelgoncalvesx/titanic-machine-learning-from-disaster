@@ -337,6 +337,8 @@ A próxima etapa será transformar a previsão fixa em uma função reutilizáve
 - [x] Gerar classe prevista e probabilidades
 - [ ] Transformar a previsão em uma função reutilizável
 - [ ] Validar os dados recebidos para previsão
+- [ ] Criar uma interface interativa com Streamlit
+- [ ] Publicar a aplicação no Streamlit Community Cloud
 - [ ] Criar uma API com FastAPI
 - [ ] Criar testes automatizados com Pytest
 - [ ] Criar um `Dockerfile`
