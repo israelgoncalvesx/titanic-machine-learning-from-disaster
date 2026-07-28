@@ -7,7 +7,7 @@
 
 > 🚧 **Projeto em desenvolvimento**
 >
-> Este projeto está sendo construído gradualmente, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma aplicação organizada, reproduzível e preparada para receber uma API.
+> Este projeto está sendo construído gradualmente, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma solução organizada, reproduzível e preparada para receber uma API.
 
 ## Sobre o projeto
 
@@ -17,26 +17,26 @@ O problema consiste em utilizar informações sobre os passageiros para construi
 
 O projeto começou com uma Análise Exploratória de Dados em Jupyter Notebook e está sendo transformado, passo a passo, em um pequeno projeto de **Machine Learning Engineering**.
 
-O fluxo planejado é:
+O fluxo atual é:
 
 ```text
 Dados
   ↓
 Análise exploratória
   ↓
-Preparação dos dados
+Engenharia de atributos
   ↓
-Treinamento do modelo
+Pré-processamento
+  ↓
+Treinamento
   ↓
 Avaliação
   ↓
-Modelo salvo
+Pipeline salvo
   ↓
 Script de previsão
   ↓
-API de previsão
-  ↓
-Testes e Docker
+API, testes e Docker
 ```
 
 ## Objetivo
@@ -54,6 +54,7 @@ Além da previsão, o projeto busca praticar:
 - organização de código Python fora do notebook;
 - criação de um processo de treinamento reproduzível;
 - persistência e reutilização de modelos treinados;
+- separação entre treinamento e inferência;
 - disponibilização futura do modelo por meio de uma API;
 - testes automatizados e conteinerização.
 
@@ -183,7 +184,7 @@ O conjunto `train.csv` foi dividido em:
 
 O parâmetro `stratify=y` mantém proporções semelhantes de sobreviventes e não sobreviventes nas duas partes.
 
-O pré-processamento e a Regressão Logística foram reunidos em um único objeto `Pipeline`. Dessa forma, o mesmo tratamento aprendido durante o treinamento será aplicado automaticamente aos dados utilizados em previsões futuras.
+O pré-processamento e a Regressão Logística foram reunidos em um único objeto `Pipeline`. Dessa forma, o mesmo tratamento aprendido durante o treinamento é aplicado automaticamente aos dados utilizados em previsões futuras.
 
 ## Resultados do modelo
 
@@ -199,8 +200,6 @@ O modelo apresentou melhor desempenho na identificação dos passageiros que nã
 Para os sobreviventes, o recall foi de **68%**, indicando que o modelo ainda possui maior dificuldade para reconhecer essa classe.
 
 ### Matriz de confusão
-
-A matriz de confusão mostra os acertos e erros do modelo no conjunto de validação:
 
 ![Matriz de confusão do modelo](images/matriz_de_confusao.png)
 
@@ -233,29 +232,63 @@ Esse arquivo contém, em um único objeto:
 
 Isso permite carregar o pipeline posteriormente e realizar previsões sem executar novamente todo o treinamento.
 
-## Etapa atual
+## Inferência com o modelo salvo
 
-O arquivo `src/train.py` já executa pelo terminal:
+O arquivo `src/predict.py` demonstra como utilizar o pipeline treinado em um novo passageiro.
+
+O script executa o seguinte fluxo:
 
 ```text
-carregamento dos dados
-        ↓
-engenharia de atributos
-        ↓
-separação de X e y
-        ↓
-divisão entre treino e validação
-        ↓
-pipeline de pré-processamento e modelo
-        ↓
-treinamento da Regressão Logística
-        ↓
-previsões e avaliação
-        ↓
-salvamento com joblib
+carregar titanic_pipeline.joblib
+              ↓
+criar os dados de um passageiro
+              ↓
+criar FamilySize e IsAlone
+              ↓
+aplicar o pipeline salvo
+              ↓
+gerar classe e probabilidades
 ```
 
-A próxima etapa será criar `src/predict.py` para carregar `models/titanic_pipeline.joblib` e fazer previsões sem treinar o modelo novamente.
+O passageiro fictício utilizado no exemplo possui:
+
+```python
+{
+    "Age": 29,
+    "SibSp": 0,
+    "Parch": 0,
+    "Fare": 80.0,
+    "Pclass": 1,
+    "Sex": "female",
+    "Embarked": "C",
+}
+```
+
+Resultado obtido pelo modelo para esse exemplo:
+
+```text
+Resultado da previsão: Sobreviveu
+Probabilidade de não sobreviver: 6,45%
+Probabilidade de sobreviver: 93,55%
+```
+
+Esses percentuais representam a estimativa produzida pelo modelo para esse passageiro fictício. Eles não representam certeza nem a acurácia geral do modelo.
+
+## Etapa atual
+
+O projeto já possui dois fluxos separados:
+
+```text
+src/train.py
+    ↓
+treina, avalia e salva o pipeline
+
+src/predict.py
+    ↓
+carrega o pipeline e faz uma previsão
+```
+
+A próxima etapa será transformar a previsão fixa em uma função reutilizável, permitindo receber diferentes passageiros e preparando o código para integração com uma API.
 
 ## Checklist do projeto
 
@@ -294,13 +327,15 @@ A próxima etapa será criar `src/predict.py` para carregar `models/titanic_pipe
 - [x] Separar as características `X` e a variável-alvo `y`
 - [x] Separar treino e validação no `src/train.py`
 - [x] Criar o pré-processamento no script
-- [x] Treinar o modelo pelo terminal
-- [x] Calcular e exibir acurácia
-- [x] Gerar o relatório de classificação
-- [x] Gerar e salvar a matriz de confusão
 - [x] Unir pré-processamento e modelo em um único `Pipeline`
+- [x] Treinar o modelo pelo terminal
+- [x] Calcular e exibir métricas
+- [x] Gerar e salvar a matriz de confusão
 - [x] Salvar o pipeline treinado com `joblib`
-- [ ] Criar um script para carregar o modelo e fazer previsões
+- [x] Criar `src/predict.py`
+- [x] Carregar o pipeline salvo sem novo treinamento
+- [x] Gerar classe prevista e probabilidades
+- [ ] Transformar a previsão em uma função reutilizável
 - [ ] Validar os dados recebidos para previsão
 - [ ] Criar uma API com FastAPI
 - [ ] Criar testes automatizados com Pytest
@@ -329,6 +364,7 @@ titanic-machine-learning-from-disaster/
 ├── src/
 │   ├── __init__.py
 │   ├── features.py
+│   ├── predict.py
 │   └── train.py
 ├── images/
 │   └── matriz_de_confusao.png
@@ -420,12 +456,23 @@ Esse comando:
 - mostra a matriz de confusão;
 - salva o pipeline em `models/titanic_pipeline.joblib`.
 
+### 6. Execute uma previsão
+
+Depois de gerar ou obter o arquivo `models/titanic_pipeline.joblib`, execute:
+
+```bash
+python -m src.predict
+```
+
+Esse comando carrega o pipeline já treinado e mostra a classe prevista e as probabilidades para o passageiro fictício definido em `src/predict.py`.
+
 ## Limitações atuais
 
 - O conjunto de dados é pequeno;
 - a coluna `Cabin` possui muitos valores ausentes;
 - o primeiro modelo utiliza apenas uma parte das informações disponíveis;
-- ainda não existe um script separado para carregar o pipeline e realizar novas previsões;
+- o `src/predict.py` ainda utiliza dados fixos de um passageiro fictício;
+- ainda não existe validação estruturada dos dados de entrada;
 - a API, os testes e o Docker ainda não foram implementados;
 - o recall dos sobreviventes ainda pode ser melhorado;
 - o desempenho no conjunto oficial de teste depende da avaliação realizada pelo Kaggle.
