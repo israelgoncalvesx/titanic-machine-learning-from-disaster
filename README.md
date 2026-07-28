@@ -1,68 +1,204 @@
-# Titanic — Análise Exploratória e Machine Learning
+# Titanic Survival Prediction — Machine Learning Project
 
-![Python](https://img.shields.io/badge/Python-3.13-blue)
-![Pandas](https://img.shields.io/badge/Pandas-3.0-150458)
-![Scikit--learn](https://img.shields.io/badge/Scikit--learn-1.9-F7931E)
-![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458)
+![Scikit--learn](https://img.shields.io/badge/Scikit--learn-Machine%20Learning-F7931E)
 ![Status](https://img.shields.io/badge/Status-em%20desenvolvimento-yellow)
 
-Projeto de portfólio em Ciência de Dados desenvolvido a partir do conjunto de dados **Titanic: Machine Learning from Disaster**.
+> 🚧 **Projeto em desenvolvimento**
+>
+> Este projeto está sendo construído de forma gradual, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma aplicação organizada, reproduzível e preparada para receber uma API.
 
-O projeto percorre duas etapas do fluxo de trabalho de Ciência de Dados:
+## Sobre o projeto
 
-1. **Análise Exploratória de Dados (EDA):** investigação das características associadas à sobrevivência dos passageiros;
-2. **Machine Learning:** construção de um pipeline de classificação para prever a sobrevivência dos passageiros presentes no conjunto de teste.
+Este é um projeto de portfólio baseado no desafio **Titanic: Machine Learning from Disaster**.
 
----
+O problema consiste em utilizar informações sobre os passageiros para construir um modelo capaz de prever se uma pessoa sobreviveu ou não ao naufrágio.
 
-## Problema analisado
+O projeto começou com uma Análise Exploratória de Dados em Jupyter Notebook e está sendo transformado, passo a passo, em um pequeno projeto de **Machine Learning Engineering**.
 
-O objetivo principal é responder à seguinte pergunta:
+O fluxo planejado é:
 
-> Quais características dos passageiros estavam associadas à sobrevivência no Titanic e como utilizar essas informações para construir um modelo de classificação?
+```text
+Dados
+  ↓
+Análise exploratória
+  ↓
+Preparação dos dados
+  ↓
+Treinamento do modelo
+  ↓
+Avaliação
+  ↓
+Modelo salvo
+  ↓
+API de previsão
+  ↓
+Testes e Docker
+```
 
-A primeira parte do projeto busca compreender os dados, identificar padrões, verificar valores ausentes e produzir visualizações. A segunda transforma essas descobertas em variáveis utilizadas por um modelo de Machine Learning.
+## Objetivo
 
----
+O objetivo principal é desenvolver uma solução de classificação que responda à seguinte pergunta:
+
+> **Com base nas características de um passageiro, é possível prever se ele sobreviveu ao Titanic?**
+
+Além da previsão, o projeto busca praticar:
+
+- análise e preparação de dados;
+- separação entre características e variável-alvo;
+- engenharia de atributos;
+- treinamento e avaliação de modelos;
+- organização de código Python fora do notebook;
+- criação de um processo de treinamento reproduzível;
+- disponibilização futura do modelo por meio de uma API;
+- testes automatizados e conteinerização.
+
+## Conceito central
+
+Neste projeto:
+
+```python
+X = características utilizadas para fazer a previsão
+y = resposta que o modelo precisa aprender
+```
+
+A variável-alvo é:
+
+```python
+y = dados["Survived"]
+```
+
+Onde:
+
+- `0` representa um passageiro que não sobreviveu;
+- `1` representa um passageiro que sobreviveu.
+
+Algumas das características utilizadas em `X` são idade, sexo, classe da passagem, tarifa e porto de embarque.
 
 ## Conjunto de dados
 
-A base utilizada está disponível no Kaggle:
+A base pode ser encontrada no Kaggle:
 
 [Download do conjunto de dados](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
 
-O projeto utiliza dois arquivos:
+O projeto utiliza:
 
 | Arquivo | Finalidade |
 |---|---|
-| `train.csv` | Contém os dados de 891 passageiros e a variável-alvo `Survived` |
-| `test.csv` | Contém 418 passageiros sem a resposta de sobrevivência |
+| `train.csv` | Dados usados para treinamento e avaliação, incluindo a coluna `Survived` |
+| `test.csv` | Dados sem a coluna `Survived`, utilizados para gerar previsões |
 
-A variável-alvo é representada por:
+Os arquivos CSV não são versionados neste repositório. Depois de baixá-los, eles devem ser colocados na pasta `data/`.
 
-- `0`: não sobreviveu;
-- `1`: sobreviveu.
-
-### Principais variáveis
+## Principais variáveis
 
 | Variável | Descrição |
 |---|---|
-| `PassengerId` | Identificador do passageiro |
-| `Survived` | Situação de sobrevivência |
+| `Survived` | Indica se o passageiro sobreviveu |
 | `Pclass` | Classe da passagem |
-| `Name` | Nome do passageiro |
 | `Sex` | Sexo registrado |
 | `Age` | Idade |
 | `SibSp` | Quantidade de irmãos, irmãs ou cônjuges a bordo |
 | `Parch` | Quantidade de pais ou filhos a bordo |
-| `Ticket` | Número do bilhete |
 | `Fare` | Valor pago pela passagem |
-| `Cabin` | Cabine registrada |
 | `Embarked` | Porto de embarque |
 
----
+## Engenharia de atributos
 
-## Estrutura do projeto
+Foram criadas duas novas características:
+
+| Atributo | Descrição |
+|---|---|
+| `FamilySize` | Quantidade total de pessoas da família, incluindo o passageiro |
+| `IsAlone` | Indica se o passageiro viajava sozinho |
+
+O tamanho da família é calculado por:
+
+```python
+FamilySize = SibSp + Parch + 1
+```
+
+O número `1` representa o próprio passageiro.
+
+A criação dessas características foi retirada do notebook e colocada em `src/features.py`, permitindo que a mesma transformação seja reutilizada no treinamento, nas previsões e, futuramente, na API.
+
+## Etapa atual
+
+O projeto está atualmente na transição entre:
+
+```text
+modelo desenvolvido no notebook
+              ↓
+código de treinamento em arquivos Python
+```
+
+O arquivo `src/train.py` já:
+
+- carrega o `train.csv`;
+- utiliza a função de engenharia de atributos;
+- seleciona as características utilizadas pelo modelo;
+- separa `X`, com as características, e `y`, com a resposta `Survived`;
+- mostra as dimensões e as primeiras linhas dos dados.
+
+O próximo passo será dividir os dados em treino e validação dentro do script.
+
+## Checklist do projeto
+
+### Fundamentos e análise de dados
+
+- [x] Criar o repositório e a estrutura inicial
+- [x] Configurar ambiente virtual e dependências
+- [x] Carregar os arquivos `train.csv` e `test.csv`
+- [x] Identificar tipos de dados e valores ausentes
+- [x] Verificar registros duplicados
+- [x] Produzir estatísticas descritivas
+- [x] Analisar sobrevivência por sexo, classe, idade e embarque
+- [x] Criar visualizações e interpretações
+
+### Modelo no Jupyter Notebook
+
+- [x] Definir `X` e `y`
+- [x] Criar `FamilySize` e `IsAlone`
+- [x] Separar dados de treino e validação
+- [x] Tratar valores ausentes
+- [x] Codificar variáveis categóricas
+- [x] Criar um pipeline com Scikit-learn
+- [x] Treinar uma Regressão Logística
+- [x] Avaliar o modelo
+- [x] Realizar validação cruzada
+- [x] Gerar previsões para o conjunto de teste
+- [x] Gerar o arquivo `submission.csv`
+
+### Organização para Machine Learning Engineering
+
+- [x] Criar o pacote `src/`
+- [x] Mover a engenharia de atributos para `src/features.py`
+- [x] Criar o arquivo `src/train.py`
+- [x] Carregar os dados pelo script de treinamento
+- [x] Separar as características `X` e a variável-alvo `y`
+- [ ] Separar treino e validação no `src/train.py`
+- [ ] Criar o pré-processamento no script
+- [ ] Treinar o modelo pelo terminal
+- [ ] Calcular e exibir métricas pelo script
+- [ ] Salvar o pipeline treinado com `joblib`
+- [ ] Criar um script para carregar o modelo e fazer previsões
+- [ ] Validar os dados recebidos para previsão
+- [ ] Criar uma API com FastAPI
+- [ ] Criar testes automatizados com Pytest
+- [ ] Criar um `Dockerfile`
+- [ ] Documentar a execução da API
+
+### Melhorias opcionais
+
+- [ ] Comparar Regressão Logística, Árvore de Decisão e Random Forest
+- [ ] Ajustar hiperparâmetros com validação cruzada
+- [ ] Extrair títulos da coluna `Name`
+- [ ] Investigar informações de `Cabin` e `Ticket`
+- [ ] Analisar a importância das características
+- [ ] Registrar o resultado obtido no Kaggle
+
+## Estrutura atual
 
 ```text
 titanic-machine-learning-from-disaster/
@@ -72,37 +208,25 @@ titanic-machine-learning-from-disaster/
 ├── notebooks/
 │   ├── 01_analise_exploratoria.ipynb
 │   └── 02_modelo_machine_learning.ipynb
+├── src/
+│   ├── __init__.py
+│   ├── features.py
+│   └── train.py
+├── app/                       # API em uma etapa futura
+├── models/                    # Pipeline treinado será salvo aqui
+├── tests/                     # Testes automatizados em uma etapa futura
 ├── .gitignore
-├── enviroment.txt
 ├── README.md
 └── requirements.txt
 ```
 
-> Os arquivos CSV não são versionados no repositório. Eles devem ser baixados do Kaggle e colocados na pasta `data/`.
+## Análise exploratória
 
----
+A análise exploratória está disponível em:
 
-# Parte 1 — Análise Exploratória de Dados
+[`notebooks/01_analise_exploratoria.ipynb`](notebooks/01_analise_exploratoria.ipynb)
 
-Notebook: [`01_analise_exploratoria.ipynb`](notebooks/01_analise_exploratoria.ipynb)
-
-A análise exploratória foi realizada para:
-
-- conhecer as dimensões e os tipos das variáveis;
-- identificar valores ausentes;
-- verificar registros duplicados;
-- calcular estatísticas descritivas;
-- analisar a distribuição das idades e tarifas;
-- comparar a sobrevivência por sexo, classe, idade e porto de embarque;
-- comunicar os resultados por meio de tabelas, gráficos e interpretações.
-
-## Qualidade dos dados
-
-O conjunto de treino possui **891 registros e 12 variáveis**.
-
-Não foram encontradas linhas completamente duplicadas.
-
-As colunas com valores ausentes foram:
+O conjunto de treino possui 891 passageiros e 12 colunas. Os principais valores ausentes estão em:
 
 | Variável | Valores ausentes | Percentual aproximado |
 |---|---:|---:|
@@ -110,334 +234,120 @@ As colunas com valores ausentes foram:
 | `Age` | 177 | 19,87% |
 | `Embarked` | 2 | 0,22% |
 
-A coluna `Cabin` exige atenção especial devido à elevada ausência de dados. A idade pode ser tratada por imputação, enquanto `Embarked` possui apenas dois registros ausentes.
+Entre os padrões observados na análise:
 
----
+- mulheres apresentaram uma taxa de sobrevivência maior que os homens;
+- passageiros da primeira classe apresentaram maior sobrevivência;
+- passageiros da terceira classe apresentaram menor sobrevivência;
+- crianças apresentaram uma taxa de sobrevivência relativamente maior;
+- tarifa e classe da passagem apresentaram relações importantes entre si.
 
-## Principais resultados da EDA
+Essas relações representam associações observadas no conjunto de dados e não comprovam causalidade.
 
-### Sobrevivência geral
+## Modelo inicial
 
-Dos 891 passageiros:
+O notebook de Machine Learning está disponível em:
 
-| Situação | Quantidade | Percentual |
-|---|---:|---:|
-| Não sobreviveu | 549 | 61,62% |
-| Sobreviveu | 342 | 38,38% |
+[`notebooks/02_modelo_machine_learning.ipynb`](notebooks/02_modelo_machine_learning.ipynb)
 
-A maioria dos passageiros presentes no conjunto de dados não sobreviveu.
+O primeiro algoritmo utilizado foi a **Regressão Logística**, adequada para um problema de classificação binária.
 
-### Sobrevivência por sexo
+O pré-processamento utiliza:
 
-| Sexo | Taxa de sobrevivência |
-|---|---:|
-| Feminino | 74,20% |
-| Masculino | 18,89% |
+- `SimpleImputer` para valores ausentes;
+- `StandardScaler` para características numéricas;
+- `OneHotEncoder` para características categóricas;
+- `ColumnTransformer` para organizar as transformações;
+- `Pipeline` para unir o pré-processamento e o modelo.
 
-A diferença observada é expressiva. O sexo do passageiro apresentou forte associação com a sobrevivência.
+## Tecnologias utilizadas
 
-### Sobrevivência por classe
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Scikit-learn
+- Jupyter Notebook
+- Git e GitHub
 
-| Classe | Taxa de sobrevivência |
-|---|---:|
-| 1ª classe | 62,96% |
-| 2ª classe | 47,28% |
-| 3ª classe | 24,24% |
+Tecnologias planejadas:
 
-Passageiros das classes superiores apresentaram taxas de sobrevivência maiores. A terceira classe teve a menor taxa.
+- Joblib
+- FastAPI
+- Pydantic
+- Pytest
+- Docker
 
-### Distribuição das idades
+## Como executar
 
-A idade média foi de aproximadamente **29,70 anos**, enquanto a mediana foi de **28 anos**. A menor idade registrada foi de **0,42 ano** e a maior foi de **80 anos**.
-
-A maior concentração de passageiros estava aproximadamente entre 18 e 35 anos.
-
-### Sobrevivência por faixa etária
-
-| Faixa etária | Taxa de sobrevivência |
-|---|---:|
-| Criança | 57,97% |
-| Adolescente | 42,86% |
-| Adulto jovem | 38,27% |
-| Adulto | 40,00% |
-| Idoso | 22,73% |
-
-Crianças apresentaram a maior taxa de sobrevivência entre as faixas analisadas. Idosos tiveram a menor taxa.
-
-Os 177 passageiros sem idade registrada não participaram dessa comparação.
-
-### Tarifa e sobrevivência
-
-Os passageiros sobreviventes apresentaram tarifas média e mediana superiores às dos não sobreviventes.
-
-Esse resultado deve ser interpretado junto com a classe da passagem, pois passageiros de classes superiores geralmente pagavam tarifas maiores. A variável `Fare` também apresenta valores extremos, tornando a mediana uma medida importante para a interpretação.
-
-### Sobrevivência por porto de embarque
-
-| Porto | Código | Taxa de sobrevivência |
-|---|---|---:|
-| Cherbourg | `C` | 55,36% |
-| Queenstown | `Q` | 38,96% |
-| Southampton | `S` | 33,70% |
-
-Cherbourg apresentou a maior taxa de sobrevivência. Entretanto, o porto de embarque também pode estar relacionado à classe e à tarifa dos passageiros.
-
----
-
-## Visualizações produzidas
-
-O notebook de análise exploratória contém os seguintes gráficos:
-
-1. **Quantidade de passageiros por situação de sobrevivência** — compara sobreviventes e não sobreviventes;
-2. **Taxa de sobrevivência por classe** — evidencia a diferença entre primeira, segunda e terceira classe;
-3. **Histograma das idades** — apresenta a distribuição etária dos passageiros;
-4. **Taxa de sobrevivência por faixa etária** — compara crianças, adolescentes, adultos jovens, adultos e idosos;
-5. **Boxplot das tarifas por sobrevivência** — mostra medianas, dispersão e valores extremos;
-6. **Taxa de sobrevivência por porto de embarque** — compara Cherbourg, Queenstown e Southampton.
-
-Os gráficos e suas interpretações podem ser visualizados diretamente no notebook:
-
-[`Abrir análise exploratória`](notebooks/01_analise_exploratoria.ipynb)
-
----
-
-## Conclusões da análise exploratória
-
-As variáveis que apresentaram associações mais relevantes com a sobrevivência foram:
-
-- sexo;
-- classe da passagem;
-- faixa etária;
-- tarifa;
-- porto de embarque.
-
-Mulheres, passageiros da primeira classe e crianças apresentaram taxas de sobrevivência maiores. Passageiros da terceira classe e idosos apresentaram taxas menores.
-
-Essas relações são **associações observadas nos dados** e não provam causalidade. Algumas variáveis estão relacionadas entre si, como classe e tarifa.
-
----
-
-# Parte 2 — Modelo de Machine Learning
-
-Notebook: [`02_modelo_machine_learning.ipynb`](notebooks/02_modelo_machine_learning.ipynb)
-
-A segunda parte utiliza o `train.csv` para treinar e validar um modelo de classificação. Depois da avaliação, o modelo é treinado com todos os registros e utilizado para gerar previsões para o `test.csv`.
-
-## Engenharia de atributos
-
-Foram criadas duas novas variáveis:
-
-| Variável | Descrição |
-|---|---|
-| `FamilySize` | Total de familiares a bordo, incluindo o próprio passageiro |
-| `IsAlone` | Indica se o passageiro viajava sozinho |
-
-A variável `FamilySize` é calculada por:
-
-```python
-FamilySize = SibSp + Parch + 1
-```
-
-## Variáveis utilizadas pelo modelo
-
-### Numéricas
-
-- `Age`;
-- `SibSp`;
-- `Parch`;
-- `Fare`;
-- `FamilySize`;
-- `IsAlone`.
-
-### Categóricas
-
-- `Pclass`;
-- `Sex`;
-- `Embarked`.
-
-As colunas `PassengerId`, `Name`, `Ticket` e `Cabin` não foram utilizadas no primeiro modelo.
-
----
-
-## Pré-processamento
-
-O pré-processamento foi organizado com `Pipeline` e `ColumnTransformer`.
-
-### Variáveis numéricas
-
-1. preenchimento de valores ausentes com a mediana;
-2. padronização com `StandardScaler`.
-
-### Variáveis categóricas
-
-1. preenchimento de valores ausentes com a categoria mais frequente;
-2. transformação das categorias com `OneHotEncoder`.
-
-O pipeline garante que as mesmas transformações sejam aplicadas aos conjuntos de treino, validação e teste, reduzindo inconsistências e risco de vazamento de dados.
-
----
-
-## Modelo utilizado
-
-O primeiro algoritmo escolhido foi a **Regressão Logística**.
-
-Apesar do nome, a Regressão Logística é um algoritmo de classificação adequado para problemas binários, como prever:
-
-- `0`: não sobreviveu;
-- `1`: sobreviveu.
-
-O conjunto de treino é dividido em:
-
-- 80% para treinamento;
-- 20% para validação.
-
-A divisão utiliza `stratify=y`, mantendo proporções semelhantes de sobreviventes e não sobreviventes nos dois subconjuntos.
-
----
-
-## Avaliação do modelo
-
-O notebook calcula:
-
-- acurácia;
-- precisão;
-- recall;
-- F1-score;
-- matriz de confusão;
-- validação cruzada com cinco divisões.
-
-A acurácia não é analisada isoladamente. O relatório de classificação e a matriz de confusão permitem avaliar se o modelo consegue identificar tanto sobreviventes quanto não sobreviventes.
-
-> As métricas numéricas serão registradas no README depois que o notebook de Machine Learning for executado e validado no ambiente local.
-
----
-
-## Arquivo de submissão
-
-Depois do treinamento final, o notebook gera o arquivo:
-
-```text
-submission.csv
-```
-
-O arquivo possui exatamente duas colunas:
-
-| Coluna | Descrição |
-|---|---|
-| `PassengerId` | Identificador do passageiro do conjunto de teste |
-| `Survived` | Previsão produzida pelo modelo |
-
-O notebook também valida automaticamente:
-
-- quantidade de linhas;
-- nomes e ordem das colunas;
-- presença apenas dos valores `0` e `1`;
-- correspondência dos identificadores com o `test.csv`.
-
----
-
-# Tecnologias utilizadas
-
-- Python;
-- Pandas;
-- NumPy;
-- Matplotlib;
-- Scikit-learn;
-- Jupyter Notebook;
-- Git e GitHub.
-
----
-
-# Como executar o projeto
-
-## 1. Clone o repositório
+### 1. Clone o repositório
 
 ```bash
 git clone https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster.git
 cd titanic-machine-learning-from-disaster
 ```
 
-## 2. Crie o ambiente virtual
+### 2. Crie e ative um ambiente virtual
 
-### Windows
+No Windows PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
 ```
 
-### Linux ou macOS
+No Linux ou macOS:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-## 3. Instale as dependências
+### 3. Instale as dependências
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-## 4. Adicione os dados
+### 4. Adicione os dados
 
-Baixe `train.csv` e `test.csv` no Kaggle e coloque os arquivos em:
+Coloque os arquivos nos seguintes caminhos:
 
 ```text
 data/train.csv
 data/test.csv
 ```
 
-## 5. Abra os notebooks
+### 5. Execute os notebooks
 
 ```bash
 jupyter notebook
 ```
 
-Execute na seguinte ordem:
+### 6. Execute o código Python atual
 
-1. `notebooks/01_analise_exploratoria.ipynb`;
-2. `notebooks/02_modelo_machine_learning.ipynb`.
+Na raiz do projeto:
 
-Antes de finalizar, utilize:
-
-```text
-Restart Kernel → Run All
+```bash
+python -m src.train
 ```
 
-Isso verifica se todas as células funcionam quando executadas desde o início.
+Atualmente, esse comando carrega a base, cria os novos atributos e separa `X` e `y`. O treinamento completo pelo terminal será implementado nas próximas etapas.
 
----
-
-# Limitações
+## Limitações atuais
 
 - O conjunto de dados é pequeno;
-- `Cabin` possui aproximadamente 77% de valores ausentes;
-- `Age` possui aproximadamente 20% de valores ausentes;
-- as relações encontradas na EDA não comprovam causalidade;
-- o modelo inicial não utiliza informações extraídas de `Name`, `Ticket` e `Cabin`;
+- a coluna `Cabin` possui muitos valores ausentes;
+- o primeiro modelo utiliza apenas uma parte das informações disponíveis;
+- o treinamento completo ainda está concentrado no notebook;
+- a API, os testes e o Docker ainda não foram implementados;
 - o desempenho no conjunto oficial de teste depende da avaliação realizada pelo Kaggle.
-
----
-
-# Próximos passos
-
-- executar e registrar as métricas finais da Regressão Logística;
-- comparar o desempenho com Árvore de Decisão e Random Forest;
-- ajustar hiperparâmetros com validação cruzada;
-- extrair títulos da coluna `Name`, como `Mr`, `Mrs`, `Miss` e `Master`;
-- extrair informações do convés a partir de `Cabin`;
-- analisar grupos e famílias pelo número do `Ticket`;
-- estudar importância das variáveis;
-- publicar o resultado da submissão do Kaggle.
-
----
 
 ## Transparência sobre o uso de Inteligência Artificial
 
-Este projeto foi desenvolvido com o **auxílio de ferramentas de Inteligência Artificial**, utilizadas como apoio para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação. A IA não realizou o projeto de forma autônoma: o código foi executado e revisado, e as decisões, interpretações e conclusões foram compreendidas e validadas pelo autor.
+Este projeto foi desenvolvido com o auxílio de ferramentas de Inteligência Artificial, utilizadas para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação.
 
----
+O código é executado, estudado e revisado pelo autor. As decisões, interpretações e conclusões são verificadas durante o processo de aprendizagem.
 
 ## Autor
 
