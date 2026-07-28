@@ -76,20 +76,37 @@ Onde:
 
 Algumas das características utilizadas em `X` são idade, sexo, classe da passagem, tarifa e porto de embarque.
 
-## Conjunto de dados
+## Fonte dos dados
 
-A base pode ser encontrada no Kaggle:
+Os dados utilizados neste projeto foram obtidos no Kaggle:
 
-[Download do conjunto de dados](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
+**Dataset utilizado:** [Titanic: Machine Learning from Disaster](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
 
-O projeto utiliza:
+O conjunto contém informações como idade, sexo, classe da passagem, tarifa, familiares a bordo e situação de sobrevivência dos passageiros.
+
+O projeto utiliza os seguintes arquivos:
 
 | Arquivo | Finalidade |
 |---|---|
 | `train.csv` | Dados usados para treinamento e avaliação, incluindo a coluna `Survived` |
 | `test.csv` | Dados sem a coluna `Survived`, utilizados para gerar previsões |
 
-Os arquivos CSV não são versionados neste repositório. Depois de baixá-los, eles devem ser colocados na pasta `data/`.
+### Como obter os dados
+
+1. Acesse a página do dataset no Kaggle;
+2. entre em sua conta do Kaggle;
+3. faça o download dos arquivos;
+4. extraia o conteúdo baixado;
+5. coloque `train.csv` e `test.csv` dentro da pasta `data/`.
+
+Os caminhos esperados são:
+
+```text
+data/train.csv
+data/test.csv
+```
+
+> Os arquivos CSV não são versionados neste repositório. Isso evita enviar dados brutos ao GitHub e mantém o repositório mais leve.
 
 ## Principais variáveis
 
@@ -149,6 +166,7 @@ O próximo passo será dividir os dados em treino e validação dentro do script
 
 - [x] Criar o repositório e a estrutura inicial
 - [x] Configurar ambiente virtual e dependências
+- [x] Baixar os dados no Kaggle
 - [x] Carregar os arquivos `train.csv` e `test.csv`
 - [x] Identificar tipos de dados e valores ausentes
 - [x] Verificar registros duplicados
@@ -309,9 +327,9 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-### 4. Adicione os dados
+### 4. Baixe e adicione os dados
 
-Coloque os arquivos nos seguintes caminhos:
+Baixe os arquivos na [página do dataset no Kaggle](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster) e coloque-os em:
 
 ```text
 data/train.csv
