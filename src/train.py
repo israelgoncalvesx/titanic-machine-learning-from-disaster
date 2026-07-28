@@ -19,5 +19,14 @@ colunas_x = [
     "Embarked",
 ]
 
-x = dados[colunas_x] #caracteristicas ds passageiros
+X = dados[colunas_x] #caracteristicas ds passageiros
 y = dados["Survived"] #sobreviveram ou não
+
+print("Primeiras linhas de X:")
+print(X.head())
+
+print("\nPrimeiras linhas de y:")
+print(y.head())
+
+print("\nFormato de X:", X.shape)
+print("Formato de y:", y.shape)
