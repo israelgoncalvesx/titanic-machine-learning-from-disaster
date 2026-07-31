@@ -12,21 +12,64 @@ st.set_page_config(
 
 
 CAMINHO_PROJETO = Path(__file__).resolve().parents[2]
-
-CAMINHO_DADOS = (
+CAMINHO_DADOS_LOCAL = (
     CAMINHO_PROJETO
     / "data"
     / "train.csv"
 )
 
+URL_DADOS = (
+    "https://raw.githubusercontent.com/"
+    "Bhasfe/titanic/master/train.csv"
+)
+
+COLUNAS_OBRIGATORIAS = {
+    "PassengerId",
+    "Survived",
+    "Pclass",
+    "Sex",
+    "Age",
+    "SibSp",
+    "Parch",
+    "Fare",
+    "Embarked",
+}
+
 
 @st.cache_data
 def carregar_dados() -> pd.DataFrame:
-    """Carrega os dados utilizados no dashboard."""
-    return pd.read_csv(CAMINHO_DADOS)
+    """Carrega o CSV local ou usa uma cópia pública como alternativa."""
+    if CAMINHO_DADOS_LOCAL.exists():
+        dados_carregados = pd.read_csv(
+            CAMINHO_DADOS_LOCAL
+        )
+    else:
+        dados_carregados = pd.read_csv(
+            URL_DADOS
+        )
+
+    colunas_ausentes = (
+        COLUNAS_OBRIGATORIAS
+        - set(dados_carregados.columns)
+    )
+
+    if colunas_ausentes:
+        raise ValueError(
+            "O conjunto de dados não possui as colunas esperadas: "
+            f"{sorted(colunas_ausentes)}"
+        )
+
+    return dados_carregados
 
 
-dados = carregar_dados()
+try:
+    dados = carregar_dados()
+except (OSError, ValueError) as erro:
+    st.error(
+        "Não foi possível carregar os dados do dashboard. "
+        f"Detalhes: {erro}"
+    )
+    st.stop()
 
 
 ROTULOS_SEXO = {
@@ -60,10 +103,6 @@ st.write(
     "sobrevivência muda de acordo com os filtros selecionados."
 )
 
-
-# ---------------------------------------------------------
-# Barra lateral
-# ---------------------------------------------------------
 
 st.sidebar.header("Filtros")
 
@@ -162,10 +201,6 @@ quantidade_faixas_idade = st.sidebar.slider(
 )
 
 
-# ---------------------------------------------------------
-# Aplicação dos filtros
-# ---------------------------------------------------------
-
 dados_filtrados = dados[
     dados["Sex"].isin(sexos_selecionados)
     & dados["Pclass"].isin(classes_selecionadas)
@@ -193,10 +228,6 @@ if dados_filtrados.empty:
     st.stop()
 
 
-# ---------------------------------------------------------
-# Indicadores
-# ---------------------------------------------------------
-
 total_passageiros = len(dados_filtrados)
 
 total_sobreviventes = int(
@@ -213,9 +244,12 @@ taxa_sobrevivencia = (
 )
 
 
-coluna_total, coluna_sobreviventes, coluna_nao_sobreviventes, coluna_taxa = (
-    st.columns(4)
-)
+(
+    coluna_total,
+    coluna_sobreviventes,
+    coluna_nao_sobreviventes,
+    coluna_taxa,
+) = st.columns(4)
 
 coluna_total.metric(
     "Passageiros",
@@ -239,11 +273,6 @@ coluna_taxa.metric(
 
 
 st.divider()
-
-
-# ---------------------------------------------------------
-# Gráfico principal
-# ---------------------------------------------------------
 
 st.subheader(
     f"Análise por {ROTULOS_VARIAVEIS[variavel_analise]}"
@@ -330,11 +359,6 @@ with coluna_sobrevivencia:
 
 st.divider()
 
-
-# ---------------------------------------------------------
-# Distribuição por idade
-# ---------------------------------------------------------
-
 st.subheader("Distribuição dos passageiros por idade")
 
 dados_com_idade = dados_filtrados.dropna(
@@ -415,11 +439,6 @@ else:
 
 st.divider()
 
-
-# ---------------------------------------------------------
-# Tabela de dados
-# ---------------------------------------------------------
-
 with st.expander("Visualizar dados filtrados"):
     colunas_exibidas = [
         "PassengerId",
@@ -440,6 +459,7 @@ with st.expander("Visualizar dados filtrados"):
     )
 
 st.caption(
-    "Os gráficos e indicadores são atualizados "
-    "automaticamente conforme os filtros da barra lateral."
+    "Os gráficos e indicadores são atualizados automaticamente. "
+    "Quando data/train.csv não está disponível, o dashboard usa "
+    "uma cópia pública do conjunto Titanic hospedada no GitHub."
 )
