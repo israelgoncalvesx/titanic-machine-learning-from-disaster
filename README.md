@@ -335,8 +335,8 @@ A próxima etapa será transformar a previsão fixa em uma função reutilizáve
 - [x] Criar `src/predict.py`
 - [x] Carregar o pipeline salvo sem novo treinamento
 - [x] Gerar classe prevista e probabilidades
-- [ ] Transformar a previsão em uma função reutilizável
-- [ ] Validar os dados recebidos para previsão
+- [x] Transformar a previsão em uma função reutilizável
+- [x] Validar os dados recebidos para previsão
 - [ ] Criar uma interface interativa com Streamlit
 - [ ] Publicar a aplicação no Streamlit Community Cloud
 - [ ] Criar uma API com FastAPI
