@@ -3,21 +3,43 @@
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458)
 ![Scikit--learn](https://img.shields.io/badge/Scikit--learn-Machine%20Learning-F7931E)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B)
 ![Status](https://img.shields.io/badge/Status-em%20desenvolvimento-yellow)
 
-> 🚧 **Projeto em desenvolvimento**
->
-> Este projeto está sendo construído gradualmente, com foco no aprendizado dos fundamentos de Machine Learning e na evolução de um notebook para uma solução organizada, reproduzível e preparada para receber uma API.
+Projeto de portfólio baseado no desafio **Titanic: Machine Learning from Disaster**, desenvolvido para praticar Análise de Dados, Machine Learning e organização de uma aplicação de Machine Learning Engineering.
 
-## Sobre o projeto
+## Aplicação publicada
 
-Este é um projeto de portfólio baseado no desafio **Titanic: Machine Learning from Disaster**.
+A interface está disponível no Streamlit Community Cloud:
 
-O problema consiste em utilizar informações sobre os passageiros para construir um modelo capaz de prever se uma pessoa sobreviveu ou não ao naufrágio.
+### [Acessar a aplicação Titanic ML](https://titanic-ml-israel.streamlit.app)
 
-O projeto começou com uma Análise Exploratória de Dados em Jupyter Notebook e está sendo transformado, passo a passo, em um pequeno projeto de **Machine Learning Engineering**.
+A aplicação possui duas páginas:
 
-O fluxo atual é:
+- **Previsão de sobrevivência:** recebe os dados de um passageiro e apresenta a classe prevista e as probabilidades estimadas pelo modelo;
+- **Dashboard:** permite explorar os dados com filtros, indicadores e gráficos dinâmicos.
+
+## Objetivo
+
+O projeto busca responder à seguinte pergunta:
+
+> **Com base nas características de um passageiro, é possível prever se ele sobreviveu ao Titanic?**
+
+Além da previsão, o projeto foi utilizado para praticar:
+
+- análise exploratória e preparação de dados;
+- engenharia de atributos;
+- tratamento de valores ausentes;
+- codificação de variáveis categóricas;
+- treinamento e avaliação de modelos;
+- criação de um pipeline reproduzível;
+- separação entre treinamento e inferência;
+- persistência do modelo com Joblib;
+- criação de uma interface com Streamlit;
+- construção de um dashboard interativo;
+- deploy no Streamlit Community Cloud.
+
+## Fluxo do projeto
 
 ```text
 Dados
@@ -34,81 +56,34 @@ Avaliação
   ↓
 Pipeline salvo
   ↓
-Script de previsão
+Função de previsão
   ↓
-API, testes e Docker
+Aplicação Streamlit
+  ↓
+Deploy
 ```
-
-## Objetivo
-
-O objetivo principal é desenvolver uma solução de classificação que responda à seguinte pergunta:
-
-> **Com base nas características de um passageiro, é possível prever se ele sobreviveu ao Titanic?**
-
-Além da previsão, o projeto busca praticar:
-
-- análise e preparação de dados;
-- separação entre características e variável-alvo;
-- engenharia de atributos;
-- treinamento e avaliação de modelos;
-- organização de código Python fora do notebook;
-- criação de um processo de treinamento reproduzível;
-- persistência e reutilização de modelos treinados;
-- separação entre treinamento e inferência;
-- disponibilização futura do modelo por meio de uma API;
-- testes automatizados e conteinerização.
-
-## Conceito central
-
-Neste projeto:
-
-```python
-X = características utilizadas para fazer a previsão
-y = resposta que o modelo precisa aprender
-```
-
-A variável-alvo é:
-
-```python
-y = dados["Survived"]
-```
-
-Onde:
-
-- `0` representa um passageiro que não sobreviveu;
-- `1` representa um passageiro que sobreviveu.
-
-Algumas das características utilizadas em `X` são idade, sexo, classe da passagem, tarifa e porto de embarque.
 
 ## Fonte dos dados
 
-Os dados utilizados neste projeto foram obtidos no Kaggle:
+Os dados foram obtidos no Kaggle:
 
-**Dataset utilizado:** [Titanic: Machine Learning from Disaster](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
+[**Titanic: Machine Learning from Disaster**](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster)
 
-O projeto utiliza os seguintes arquivos:
+O projeto utiliza:
 
 | Arquivo | Finalidade |
 |---|---|
-| `train.csv` | Dados usados para treinamento e avaliação, incluindo a coluna `Survived` |
-| `test.csv` | Dados sem a coluna `Survived`, utilizados para gerar previsões |
+| `train.csv` | Treinamento, avaliação e dashboard |
+| `test.csv` | Geração de previsões para submissão no Kaggle |
 
-### Como obter os dados
-
-1. Acesse a página do dataset no Kaggle;
-2. entre em sua conta;
-3. faça o download dos arquivos;
-4. extraia o conteúdo;
-5. coloque `train.csv` e `test.csv` dentro da pasta `data/`.
-
-Os caminhos esperados são:
+Para executar o treinamento localmente, coloque os arquivos em:
 
 ```text
 data/train.csv
 data/test.csv
 ```
 
-> Os arquivos CSV não são versionados neste repositório. Isso evita enviar dados brutos ao GitHub e mantém o repositório mais leve.
+Os CSVs não são versionados no repositório. Quando `data/train.csv` não está disponível, o dashboard usa uma cópia pública do conjunto de dados para continuar funcionando no deploy.
 
 ## Principais variáveis
 
@@ -125,7 +100,7 @@ data/test.csv
 
 ## Engenharia de atributos
 
-Foram criadas duas novas características:
+Foram criadas duas características adicionais:
 
 | Atributo | Descrição |
 |---|---|
@@ -138,15 +113,11 @@ O tamanho da família é calculado por:
 FamilySize = SibSp + Parch + 1
 ```
 
-O número `1` representa o próprio passageiro.
-
-A criação dessas características foi retirada do notebook e colocada em `src/features.py`, permitindo que a transformação seja reutilizada no treinamento, nas previsões e, futuramente, na API.
+Essas transformações ficam em `src/features.py` e são reutilizadas no treinamento e nas previsões.
 
 ## Pré-processamento
 
-As características foram divididas em dois grupos.
-
-### Numéricas
+### Variáveis numéricas
 
 - `Age`;
 - `SibSp`;
@@ -155,254 +126,96 @@ As características foram divididas em dois grupos.
 - `FamilySize`;
 - `IsAlone`.
 
-O tratamento numérico utiliza:
+Tratamentos aplicados:
 
-- `SimpleImputer` com a mediana para preencher valores ausentes;
-- `StandardScaler` para colocar as variáveis em escalas comparáveis.
+- `SimpleImputer` com a mediana;
+- `StandardScaler`.
 
-### Categóricas
+### Variáveis categóricas
 
 - `Pclass`;
 - `Sex`;
 - `Embarked`.
 
-O tratamento categórico utiliza:
+Tratamentos aplicados:
 
 - `SimpleImputer` com a categoria mais frequente;
-- `OneHotEncoder` para converter categorias em colunas numéricas.
+- `OneHotEncoder`.
 
-O `ColumnTransformer` aplica o tratamento correto a cada grupo de colunas.
+O pré-processamento e o modelo são reunidos em um único objeto `Pipeline` do Scikit-learn.
 
-## Modelo inicial
+## Modelo e resultados
 
-O primeiro algoritmo utilizado foi a **Regressão Logística**, adequada para um problema de classificação binária.
+O modelo inicial é uma **Regressão Logística**, treinada com 80% dos dados e validada com os 20% restantes. A divisão utiliza `stratify=y` para preservar a proporção das classes.
 
-O conjunto `train.csv` foi dividido em:
-
-- 80% para treinamento;
-- 20% para validação.
-
-O parâmetro `stratify=y` mantém proporções semelhantes de sobreviventes e não sobreviventes nas duas partes.
-
-O pré-processamento e a Regressão Logística foram reunidos em um único objeto `Pipeline`. Dessa forma, o mesmo tratamento aprendido durante o treinamento é aplicado automaticamente aos dados utilizados em previsões futuras.
-
-## Resultados do modelo
-
-A Regressão Logística obteve **81,56% de acurácia** no conjunto de validação, composto por 179 passageiros.
+A acurácia obtida no conjunto de validação foi de **81,56%**, em 179 passageiros.
 
 | Classe | Precision | Recall | F1-score | Registros |
 |---|---:|---:|---:|---:|
 | Não sobreviveu | 0,82 | 0,90 | 0,86 | 110 |
 | Sobreviveu | 0,81 | 0,68 | 0,74 | 69 |
 
-O modelo apresentou melhor desempenho na identificação dos passageiros que não sobreviveram, alcançando recall de **90%** nessa classe.
-
-Para os sobreviventes, o recall foi de **68%**, indicando que o modelo ainda possui maior dificuldade para reconhecer essa classe.
+O modelo apresentou maior facilidade para identificar passageiros que não sobreviveram. O principal ponto de melhoria é o recall da classe dos sobreviventes.
 
 ### Matriz de confusão
 
 ![Matriz de confusão do modelo](images/matriz_de_confusao.png)
 
-O modelo classificou corretamente:
-
-- 99 passageiros que não sobreviveram;
-- 47 passageiros que sobreviveram.
-
-Os erros foram:
-
-- 11 passageiros classificados como sobreviventes, mas que não sobreviveram;
-- 22 passageiros classificados como não sobreviventes, mas que sobreviveram.
-
-No total, o modelo acertou 146 dos 179 casos de validação. O principal ponto de melhoria é reduzir os 22 falsos negativos da classe `Sobreviveu`.
-
-## Pipeline treinado
-
-Após o treinamento, o pipeline completo é salvo com `joblib` em:
+O pipeline treinado é armazenado em:
 
 ```text
 models/titanic_pipeline.joblib
 ```
 
-Esse arquivo contém, em um único objeto:
+## Interface Streamlit
 
-- preenchimento dos valores ausentes;
-- padronização das variáveis numéricas;
-- codificação das variáveis categóricas;
-- Regressão Logística treinada.
-
-Isso permite carregar o pipeline posteriormente e realizar previsões sem executar novamente todo o treinamento.
-
-## Inferência com o modelo salvo
-
-O arquivo `src/predict.py` demonstra como utilizar o pipeline treinado em um novo passageiro.
-
-O script executa o seguinte fluxo:
+O arquivo principal da aplicação é:
 
 ```text
-carregar titanic_pipeline.joblib
-              ↓
-criar os dados de um passageiro
-              ↓
-criar FamilySize e IsAlone
-              ↓
-aplicar o pipeline salvo
-              ↓
-gerar classe e probabilidades
+app/streamlit_app.py
 ```
 
-O passageiro fictício utilizado no exemplo possui:
+A interface permite informar:
 
-```python
-{
-    "Age": 29,
-    "SibSp": 0,
-    "Parch": 0,
-    "Fare": 80.0,
-    "Pclass": 1,
-    "Sex": "female",
-    "Embarked": "C",
-}
-```
+- classe da passagem;
+- sexo;
+- idade;
+- quantidade de irmãos, irmãs ou cônjuges;
+- quantidade de pais ou filhos;
+- valor da passagem;
+- porto de embarque.
 
-Resultado obtido pelo modelo para esse exemplo:
+Ao selecionar **Realizar previsão**, a aplicação:
+
+1. valida os dados informados;
+2. cria `FamilySize` e `IsAlone`;
+3. aplica o pipeline treinado;
+4. apresenta a classe prevista;
+5. exibe as probabilidades de sobreviver e não sobreviver.
+
+## Dashboard interativo
+
+A página do dashboard está em:
 
 ```text
-Resultado da previsão: Sobreviveu
-Probabilidade de não sobreviver: 6,45%
-Probabilidade de sobreviver: 93,55%
+app/pages/1_Dashboard.py
 ```
 
-Esses percentuais representam a estimativa produzida pelo modelo para esse passageiro fictício. Eles não representam certeza nem a acurácia geral do modelo.
+O dashboard possui:
 
-## Etapa atual
+- filtros por sexo;
+- filtros por classe da passagem;
+- filtros por porto de embarque;
+- filtro opcional por intervalo de idade;
+- escolha da variável analisada no gráfico principal;
+- indicadores de passageiros, sobreviventes e taxa de sobrevivência;
+- gráficos de quantidade e taxa de sobrevivência;
+- distribuição por faixas de idade;
+- tabela com os dados filtrados.
 
-O projeto já possui dois fluxos separados:
+Os gráficos e indicadores são atualizados automaticamente quando os filtros são modificados.
 
-```text
-src/train.py
-    ↓
-treina, avalia e salva o pipeline
-
-src/predict.py
-    ↓
-carrega o pipeline e faz uma previsão
-```
-
-A próxima etapa será transformar a previsão fixa em uma função reutilizável, permitindo receber diferentes passageiros e preparando o código para integração com uma API.
-
-## Checklist do projeto
-
-### Fundamentos e análise de dados
-
-- [x] Criar o repositório e a estrutura inicial
-- [x] Configurar ambiente virtual e dependências
-- [x] Baixar os dados no Kaggle
-- [x] Carregar os arquivos `train.csv` e `test.csv`
-- [x] Identificar tipos de dados e valores ausentes
-- [x] Verificar registros duplicados
-- [x] Produzir estatísticas descritivas
-- [x] Analisar sobrevivência por sexo, classe, idade e embarque
-- [x] Criar visualizações e interpretações
-
-### Modelo no Jupyter Notebook
-
-- [x] Definir `X` e `y`
-- [x] Criar `FamilySize` e `IsAlone`
-- [x] Separar dados de treino e validação
-- [x] Tratar valores ausentes
-- [x] Codificar variáveis categóricas
-- [x] Criar um pipeline com Scikit-learn
-- [x] Treinar uma Regressão Logística
-- [x] Avaliar o modelo
-- [x] Realizar validação cruzada
-- [x] Gerar previsões para o conjunto de teste
-- [x] Gerar o arquivo `submission.csv`
-
-### Organização para Machine Learning Engineering
-
-- [x] Criar o pacote `src/`
-- [x] Mover a engenharia de atributos para `src/features.py`
-- [x] Criar o arquivo `src/train.py`
-- [x] Carregar os dados pelo script de treinamento
-- [x] Separar as características `X` e a variável-alvo `y`
-- [x] Separar treino e validação no `src/train.py`
-- [x] Criar o pré-processamento no script
-- [x] Unir pré-processamento e modelo em um único `Pipeline`
-- [x] Treinar o modelo pelo terminal
-- [x] Calcular e exibir métricas
-- [x] Gerar e salvar a matriz de confusão
-- [x] Salvar o pipeline treinado com `joblib`
-- [x] Criar `src/predict.py`
-- [x] Carregar o pipeline salvo sem novo treinamento
-- [x] Gerar classe prevista e probabilidades
-- [x] Transformar a previsão em uma função reutilizável
-- [x] Validar os dados recebidos para previsão
-- [ ] Criar uma interface interativa com Streamlit
-- [ ] Publicar a aplicação no Streamlit Community Cloud
-- [ ] Criar uma API com FastAPI
-- [ ] Criar testes automatizados com Pytest
-- [ ] Criar um `Dockerfile`
-- [ ] Documentar a execução da API
-
-### Melhorias opcionais
-
-- [ ] Comparar Regressão Logística, Árvore de Decisão e Random Forest
-- [ ] Ajustar hiperparâmetros com validação cruzada
-- [ ] Extrair títulos da coluna `Name`
-- [ ] Investigar informações de `Cabin` e `Ticket`
-- [ ] Analisar a importância das características
-- [ ] Registrar o resultado obtido no Kaggle
-
-## Estrutura atual
-
-```text
-titanic-machine-learning-from-disaster/
-├── data/
-│   ├── train.csv
-│   └── test.csv
-├── notebooks/
-│   ├── 01_analise_exploratoria.ipynb
-│   └── 02_modelo_machine_learning.ipynb
-├── src/
-│   ├── __init__.py
-│   ├── features.py
-│   ├── predict.py
-│   └── train.py
-├── images/
-│   └── matriz_de_confusao.png
-├── models/
-│   └── titanic_pipeline.joblib
-├── app/                       # API em uma etapa futura
-├── tests/                     # Testes automatizados em uma etapa futura
-├── .gitignore
-├── README.md
-└── requirements.txt
-```
-
-## Notebooks
-
-- [Análise exploratória](notebooks/01_analise_exploratoria.ipynb)
-- [Modelo de Machine Learning](notebooks/02_modelo_machine_learning.ipynb)
-
-## Tecnologias utilizadas
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Scikit-learn
-- Joblib
-- Jupyter Notebook
-- Git e GitHub
-
-Tecnologias planejadas:
-
-- FastAPI
-- Pydantic
-- Pytest
-- Docker
-
-## Como executar
+## Como executar localmente
 
 ### 1. Clone o repositório
 
@@ -411,7 +224,7 @@ git clone https://github.com/israelgoncalvesx/titanic-machine-learning-from-disa
 cd titanic-machine-learning-from-disaster
 ```
 
-### 2. Crie e ative um ambiente virtual
+### 2. Crie e ative o ambiente virtual
 
 No Windows PowerShell:
 
@@ -433,51 +246,166 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-### 4. Baixe e adicione os dados
+### 4. Execute a aplicação Streamlit
 
-Baixe os arquivos na [página do dataset no Kaggle](https://www.kaggle.com/datasets/shuofxz/titanic-machine-learning-from-disaster) e coloque-os em:
+Na raiz do projeto:
+
+```bash
+python -m streamlit run app/streamlit_app.py
+```
+
+O Streamlit exibirá um endereço local, normalmente:
 
 ```text
-data/train.csv
-data/test.csv
+http://localhost:8501
 ```
+
+Use a navegação lateral para alternar entre a página de previsão e o dashboard.
 
 ### 5. Execute o treinamento
 
-Na raiz do projeto:
+Para treinar novamente o modelo, adicione os CSVs na pasta `data/` e execute:
 
 ```bash
 python -m src.train
 ```
 
-Esse comando:
+O comando prepara os dados, treina o pipeline, apresenta as métricas e salva o modelo em `models/titanic_pipeline.joblib`.
 
-- prepara os dados;
-- treina o pipeline;
-- exibe as métricas de avaliação;
-- mostra a matriz de confusão;
-- salva o pipeline em `models/titanic_pipeline.joblib`.
-
-### 6. Execute uma previsão
-
-Depois de gerar ou obter o arquivo `models/titanic_pipeline.joblib`, execute:
+### 6. Execute uma previsão pelo terminal
 
 ```bash
 python -m src.predict
 ```
 
-Esse comando carrega o pipeline já treinado e mostra a classe prevista e as probabilidades para o passageiro fictício definido em `src/predict.py`.
+Esse comando utiliza o passageiro de exemplo definido em `src/predict.py`.
+
+## Observações importantes
+
+- A previsão representa uma **estimativa estatística**, não uma certeza;
+- as probabilidades exibidas se referem ao passageiro informado e não à acurácia geral do modelo;
+- o modelo foi treinado com um conjunto de dados pequeno e histórico;
+- a aplicação possui finalidade educacional e de portfólio;
+- o modelo pode reproduzir padrões e limitações presentes nos dados de treinamento;
+- o desempenho de 81,56% foi medido no conjunto de validação utilizado neste projeto;
+- o resultado não deve ser interpretado como uma relação causal entre as variáveis e a sobrevivência.
 
 ## Limitações atuais
 
 - O conjunto de dados é pequeno;
 - a coluna `Cabin` possui muitos valores ausentes;
-- o primeiro modelo utiliza apenas uma parte das informações disponíveis;
-- o `src/predict.py` ainda utiliza dados fixos de um passageiro fictício;
-- ainda não existe validação estruturada dos dados de entrada;
-- a API, os testes e o Docker ainda não foram implementados;
+- o modelo utiliza apenas uma parte das informações disponíveis;
 - o recall dos sobreviventes ainda pode ser melhorado;
-- o desempenho no conjunto oficial de teste depende da avaliação realizada pelo Kaggle.
+- ainda não existe uma API externa para consumir o modelo;
+- testes automatizados e Docker ainda não foram implementados;
+- o desempenho no conjunto oficial de teste depende da avaliação do Kaggle.
+
+## Estrutura atual
+
+```text
+titanic-machine-learning-from-disaster/
+├── app/
+│   ├── pages/
+│   │   └── 1_Dashboard.py
+│   └── streamlit_app.py
+├── data/
+│   ├── train.csv
+│   └── test.csv
+├── images/
+│   └── matriz_de_confusao.png
+├── models/
+│   └── titanic_pipeline.joblib
+├── notebooks/
+│   ├── 01_analise_exploratoria.ipynb
+│   └── 02_modelo_machine_learning.ipynb
+├── src/
+│   ├── __init__.py
+│   ├── features.py
+│   ├── predict.py
+│   └── train.py
+├── tests/
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
+
+## Tecnologias utilizadas
+
+- Python;
+- Pandas;
+- NumPy;
+- Matplotlib;
+- Scikit-learn;
+- Joblib;
+- Streamlit;
+- Jupyter Notebook;
+- Git e GitHub;
+- Streamlit Community Cloud.
+
+Tecnologias planejadas:
+
+- FastAPI;
+- Pydantic;
+- Pytest;
+- Docker.
+
+## Checklist do projeto
+
+### Fundamentos e análise de dados
+
+- [x] Criar o repositório e a estrutura inicial
+- [x] Configurar ambiente virtual e dependências
+- [x] Baixar os dados no Kaggle
+- [x] Carregar `train.csv` e `test.csv`
+- [x] Identificar tipos de dados e valores ausentes
+- [x] Verificar registros duplicados
+- [x] Produzir estatísticas descritivas
+- [x] Analisar sobrevivência por sexo, classe, idade e embarque
+- [x] Criar visualizações e interpretações
+
+### Modelo no Jupyter Notebook
+
+- [x] Definir `X` e `y`
+- [x] Criar `FamilySize` e `IsAlone`
+- [x] Separar dados de treino e validação
+- [x] Tratar valores ausentes
+- [x] Codificar variáveis categóricas
+- [x] Criar um pipeline com Scikit-learn
+- [x] Treinar uma Regressão Logística
+- [x] Avaliar o modelo
+- [x] Realizar validação cruzada
+- [x] Gerar previsões para o conjunto de teste
+- [x] Gerar `submission.csv`
+
+### Organização para Machine Learning Engineering
+
+- [x] Criar o pacote `src/`
+- [x] Mover a engenharia de atributos para `src/features.py`
+- [x] Criar `src/train.py`
+- [x] Criar um pipeline reproduzível
+- [x] Salvar o pipeline treinado com Joblib
+- [x] Criar `src/predict.py`
+- [x] Carregar o pipeline salvo sem novo treinamento
+- [x] Gerar classe prevista e probabilidades
+- [x] Transformar a previsão em uma função reutilizável
+- [x] Validar os dados recebidos para previsão
+- [x] Criar uma interface interativa com Streamlit
+- [x] Criar um dashboard com filtros e gráficos dinâmicos
+- [x] Preparar dependências e caminhos para o deploy
+- [x] Publicar a aplicação no Streamlit Community Cloud
+- [ ] Criar uma API com FastAPI
+- [ ] Criar testes automatizados com Pytest
+- [ ] Criar um `Dockerfile`
+- [ ] Documentar a execução da API
+
+### Melhorias opcionais
+
+- [ ] Comparar Regressão Logística, Árvore de Decisão e Random Forest
+- [ ] Ajustar hiperparâmetros com validação cruzada
+- [ ] Extrair títulos da coluna `Name`
+- [ ] Investigar informações de `Cabin` e `Ticket`
+- [ ] Analisar a importância das características
+- [ ] Registrar o resultado obtido no Kaggle
 
 ## Transparência sobre o uso de Inteligência Artificial
 
