@@ -12,11 +12,7 @@ st.set_page_config(
 
 
 CAMINHO_PROJETO = Path(__file__).resolve().parents[2]
-CAMINHO_DADOS_LOCAL = (
-    CAMINHO_PROJETO
-    / "data"
-    / "train.csv"
-)
+CAMINHO_DADOS_LOCAL = CAMINHO_PROJETO / "data" / "train.csv"
 
 URL_DADOS = (
     "https://raw.githubusercontent.com/"
@@ -34,43 +30,6 @@ COLUNAS_OBRIGATORIAS = {
     "Fare",
     "Embarked",
 }
-
-
-@st.cache_data
-def carregar_dados() -> pd.DataFrame:
-    """Carrega o CSV local ou usa uma cópia pública como alternativa."""
-    if CAMINHO_DADOS_LOCAL.exists():
-        dados_carregados = pd.read_csv(
-            CAMINHO_DADOS_LOCAL
-        )
-    else:
-        dados_carregados = pd.read_csv(
-            URL_DADOS
-        )
-
-    colunas_ausentes = (
-        COLUNAS_OBRIGATORIAS
-        - set(dados_carregados.columns)
-    )
-
-    if colunas_ausentes:
-        raise ValueError(
-            "O conjunto de dados não possui as colunas esperadas: "
-            f"{sorted(colunas_ausentes)}"
-        )
-
-    return dados_carregados
-
-
-try:
-    dados = carregar_dados()
-except (OSError, ValueError) as erro:
-    st.error(
-        "Não foi possível carregar os dados do dashboard. "
-        f"Detalhes: {erro}"
-    )
-    st.stop()
-
 
 ROTULOS_SEXO = {
     "female": "Feminino",
@@ -96,6 +55,49 @@ ROTULOS_VARIAVEIS = {
 }
 
 
+@st.cache_data
+def carregar_dados() -> pd.DataFrame:
+    """Carrega o CSV local ou usa uma cópia pública."""
+    caminho = (
+        CAMINHO_DADOS_LOCAL
+        if CAMINHO_DADOS_LOCAL.exists()
+        else URL_DADOS
+    )
+
+    dados_carregados = pd.read_csv(caminho)
+
+    colunas_ausentes = (
+        COLUNAS_OBRIGATORIAS
+        - set(dados_carregados.columns)
+    )
+
+    if colunas_ausentes:
+        raise ValueError(
+            "O conjunto de dados não possui as colunas esperadas: "
+            f"{sorted(colunas_ausentes)}"
+        )
+
+    return dados_carregados
+
+
+def formatar_faixa_idade(intervalo: pd.Interval) -> str:
+    """Transforma um intervalo do pandas em um rótulo legível."""
+    inicio = max(0, round(float(intervalo.left)))
+    fim = round(float(intervalo.right))
+
+    return f"{inicio}–{fim} anos"
+
+
+try:
+    dados = carregar_dados()
+except (OSError, ValueError) as erro:
+    st.error(
+        "Não foi possível carregar os dados do dashboard. "
+        f"Detalhes: {erro}"
+    )
+    st.stop()
+
+
 st.title("Dashboard do Titanic")
 
 st.write(
@@ -118,49 +120,33 @@ embarques_disponiveis = sorted(
     dados["Embarked"].dropna().unique().tolist()
 )
 
-
 sexos_selecionados = st.sidebar.multiselect(
     "Sexo",
     options=sexos_disponiveis,
     default=sexos_disponiveis,
-    format_func=lambda valor: ROTULOS_SEXO.get(
-        valor,
-        valor,
-    ),
+    format_func=lambda valor: ROTULOS_SEXO.get(valor, valor),
 )
 
 classes_selecionadas = st.sidebar.multiselect(
     "Classe da passagem",
     options=classes_disponiveis,
     default=classes_disponiveis,
-    format_func=lambda valor: ROTULOS_CLASSE.get(
-        valor,
-        valor,
-    ),
+    format_func=lambda valor: ROTULOS_CLASSE.get(valor, valor),
 )
 
 embarques_selecionados = st.sidebar.multiselect(
     "Porto de embarque",
     options=embarques_disponiveis,
     default=embarques_disponiveis,
-    format_func=lambda valor: ROTULOS_EMBARQUE.get(
-        valor,
-        valor,
-    ),
+    format_func=lambda valor: ROTULOS_EMBARQUE.get(valor, valor),
 )
-
 
 aplicar_filtro_idade = st.sidebar.checkbox(
     "Aplicar filtro de idade"
 )
 
-idade_minima_dados = int(
-    dados["Age"].dropna().min()
-)
-
-idade_maxima_dados = int(
-    dados["Age"].dropna().max()
-)
+idade_minima_dados = int(dados["Age"].dropna().min())
+idade_maxima_dados = int(dados["Age"].dropna().max())
 
 intervalo_idade = (
     idade_minima_dados,
@@ -172,25 +158,14 @@ if aplicar_filtro_idade:
         "Intervalo de idade",
         min_value=idade_minima_dados,
         max_value=idade_maxima_dados,
-        value=(
-            idade_minima_dados,
-            idade_maxima_dados,
-        ),
+        value=intervalo_idade,
     )
-
 
 variavel_analise = st.sidebar.selectbox(
     "Variável do gráfico principal",
-    options=[
-        "Sex",
-        "Pclass",
-        "Embarked",
-    ],
-    format_func=lambda valor: ROTULOS_VARIAVEIS[
-        valor
-    ],
+    options=["Sex", "Pclass", "Embarked"],
+    format_func=lambda valor: ROTULOS_VARIAVEIS[valor],
 )
-
 
 quantidade_faixas_idade = st.sidebar.slider(
     "Quantidade de faixas de idade",
@@ -204,9 +179,7 @@ quantidade_faixas_idade = st.sidebar.slider(
 dados_filtrados = dados[
     dados["Sex"].isin(sexos_selecionados)
     & dados["Pclass"].isin(classes_selecionadas)
-    & dados["Embarked"].isin(
-        embarques_selecionados
-    )
+    & dados["Embarked"].isin(embarques_selecionados)
 ].copy()
 
 if aplicar_filtro_idade:
@@ -219,7 +192,6 @@ if aplicar_filtro_idade:
         )
     ].copy()
 
-
 if dados_filtrados.empty:
     st.warning(
         "Nenhum passageiro foi encontrado com os "
@@ -229,20 +201,14 @@ if dados_filtrados.empty:
 
 
 total_passageiros = len(dados_filtrados)
-
 total_sobreviventes = int(
     dados_filtrados["Survived"].sum()
 )
-
 total_nao_sobreviventes = (
     total_passageiros
     - total_sobreviventes
 )
-
-taxa_sobrevivencia = (
-    dados_filtrados["Survived"].mean()
-)
-
+taxa_sobrevivencia = dados_filtrados["Survived"].mean()
 
 (
     coluna_total,
@@ -285,18 +251,9 @@ dados_grafico = (
         dropna=False,
     )
     .agg(
-        Passageiros=(
-            "PassengerId",
-            "count",
-        ),
-        Sobreviventes=(
-            "Survived",
-            "sum",
-        ),
-        Taxa_sobrevivencia=(
-            "Survived",
-            "mean",
-        ),
+        Passageiros=("PassengerId", "count"),
+        Sobreviventes=("Survived", "sum"),
+        Taxa_sobrevivencia=("Survived", "mean"),
     )
     .reset_index()
 )
@@ -306,29 +263,22 @@ dados_grafico["Taxa de sobrevivência (%)"] = (
     * 100
 )
 
-
 if variavel_analise == "Sex":
     dados_grafico["Categoria"] = (
-        dados_grafico["Sex"]
-        .map(ROTULOS_SEXO)
+        dados_grafico["Sex"].map(ROTULOS_SEXO)
     )
 
 elif variavel_analise == "Pclass":
     dados_grafico["Categoria"] = (
-        dados_grafico["Pclass"]
-        .map(ROTULOS_CLASSE)
+        dados_grafico["Pclass"].map(ROTULOS_CLASSE)
     )
 
 else:
     dados_grafico["Categoria"] = (
-        dados_grafico["Embarked"]
-        .map(ROTULOS_EMBARQUE)
+        dados_grafico["Embarked"].map(ROTULOS_EMBARQUE)
     )
 
-
-coluna_quantidade, coluna_sobrevivencia = (
-    st.columns(2)
-)
+coluna_quantidade, coluna_sobrevivencia = st.columns(2)
 
 with coluna_quantidade:
     st.markdown("#### Quantidade de passageiros")
@@ -337,9 +287,7 @@ with coluna_quantidade:
         dados_grafico,
         x="Categoria",
         y="Passageiros",
-        x_label=ROTULOS_VARIAVEIS[
-            variavel_analise
-        ],
+        x_label=ROTULOS_VARIAVEIS[variavel_analise],
         y_label="Quantidade",
     )
 
@@ -350,9 +298,7 @@ with coluna_sobrevivencia:
         dados_grafico,
         x="Categoria",
         y="Taxa de sobrevivência (%)",
-        x_label=ROTULOS_VARIAVEIS[
-            variavel_analise
-        ],
+        x_label=ROTULOS_VARIAVEIS[variavel_analise],
         y_label="Sobrevivência (%)",
     )
 
@@ -371,70 +317,88 @@ if dados_com_idade.empty:
         "filtros selecionados."
     )
 
+elif dados_com_idade["Age"].nunique() == 1:
+    idade_unica = dados_com_idade["Age"].iloc[0]
+
+    distribuicao_idade = pd.DataFrame(
+        {
+            "Faixa de idade": [f"{idade_unica:g} anos"],
+            "Passageiros": [len(dados_com_idade)],
+            "Taxa de sobrevivência (%)": [
+                dados_com_idade["Survived"].mean() * 100
+            ],
+        }
+    )
+
 else:
-    dados_com_idade["Faixa de idade"] = pd.cut(
+    dados_com_idade["Intervalo de idade"] = pd.cut(
         dados_com_idade["Age"],
         bins=quantidade_faixas_idade,
         include_lowest=True,
-    ).astype(str)
+        precision=0,
+        duplicates="drop",
+    )
 
     distribuicao_idade = (
         dados_com_idade
         .groupby(
-            "Faixa de idade",
+            "Intervalo de idade",
             observed=True,
+            sort=True,
         )
         .agg(
-            Passageiros=(
-                "PassengerId",
-                "count",
-            ),
-            Taxa_sobrevivencia=(
-                "Survived",
-                "mean",
-            ),
+            Passageiros=("PassengerId", "count"),
+            Taxa_sobrevivencia=("Survived", "mean"),
         )
         .reset_index()
+    )
+
+    distribuicao_idade["Faixa de idade"] = (
+        distribuicao_idade["Intervalo de idade"]
+        .map(formatar_faixa_idade)
+        .astype(str)
     )
 
     distribuicao_idade[
         "Taxa de sobrevivência (%)"
     ] = (
-        distribuicao_idade[
-            "Taxa_sobrevivencia"
-        ]
+        distribuicao_idade["Taxa_sobrevivencia"]
         * 100
     )
 
-    coluna_idade, coluna_taxa_idade = (
-        st.columns(2)
+coluna_idade, coluna_taxa_idade = st.columns(2)
+
+with coluna_idade:
+    st.markdown(
+        "#### Passageiros por faixa de idade"
     )
 
-    with coluna_idade:
-        st.markdown(
-            "#### Passageiros por faixa de idade"
-        )
+    st.bar_chart(
+        distribuicao_idade,
+        x="Faixa de idade",
+        y="Passageiros",
+        x_label="Faixa de idade",
+        y_label="Quantidade",
+    )
 
-        st.bar_chart(
-            distribuicao_idade,
-            x="Faixa de idade",
-            y="Passageiros",
-            x_label="Faixa de idade",
-            y_label="Quantidade",
-        )
+with coluna_taxa_idade:
+    st.markdown(
+        "#### Sobrevivência por faixa de idade"
+    )
 
-    with coluna_taxa_idade:
-        st.markdown(
-            "#### Sobrevivência por faixa de idade"
-        )
+    st.bar_chart(
+        distribuicao_idade,
+        x="Faixa de idade",
+        y="Taxa de sobrevivência (%)",
+        x_label="Faixa de idade",
+        y_label="Sobrevivência (%)",
+    )
 
-        st.bar_chart(
-            distribuicao_idade,
-            x="Faixa de idade",
-            y="Taxa de sobrevivência (%)",
-            x_label="Faixa de idade",
-            y_label="Sobrevivência (%)",
-        )
+st.caption(
+    "As faixas são ordenadas numericamente. "
+    "Quando uma barra de sobrevivência não aparece, "
+    "a taxa daquele grupo é 0%."
+)
 
 
 st.divider()
