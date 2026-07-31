@@ -91,7 +91,12 @@ if botao_prever:
         resultado = prever_passageiro(
             dados_passageiro
         )
-    except (TypeError, ValueError) as erro:
+    except (
+        TypeError,
+        ValueError,
+        FileNotFoundError,
+        OSError,
+    ) as erro:
         st.error(str(erro))
         st.stop()
 
