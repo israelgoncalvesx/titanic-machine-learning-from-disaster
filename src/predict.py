@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 import joblib
@@ -6,9 +7,12 @@ import pandas as pd
 from src.features import criar_atributos
 
 
-caminho_modelo = Path("models/titanic_pipeline.joblib")
-
-pipeline_modelo = joblib.load(caminho_modelo)
+CAMINHO_PROJETO = Path(__file__).resolve().parents[1]
+CAMINHO_MODELO = (
+    CAMINHO_PROJETO
+    / "models"
+    / "titanic_pipeline.joblib"
+)
 
 COLUNAS_OBRIGATORIAS = {
     "Age",
@@ -21,45 +25,54 @@ COLUNAS_OBRIGATORIAS = {
 }
 
 
-def prever_passageiro(dados_passageiro: dict) -> dict:
-    """
-    Recebe os dados de um passageiro e retorna a previsão do modelo.
-    """
+@lru_cache(maxsize=1)
+def carregar_modelo():
+    """Carrega o pipeline treinado uma única vez."""
+    if not CAMINHO_MODELO.exists():
+        raise FileNotFoundError(
+            "O modelo treinado não foi encontrado em "
+            f"{CAMINHO_MODELO}."
+        )
 
+    return joblib.load(CAMINHO_MODELO)
+
+
+def prever_passageiro(dados_passageiro: dict) -> dict:
+    """Recebe os dados de um passageiro e retorna a previsão."""
     if not isinstance(dados_passageiro, dict):
         raise TypeError(
             "Os dados do passageiro devem ser enviados em um dicionário."
         )
 
     campos_ausentes = (
-            COLUNAS_OBRIGATORIAS #compara os atributos dos dicionários com campos que deveriam existir com os que realmente existem
-            - dados_passageiro.keys()
+        COLUNAS_OBRIGATORIAS
+        - dados_passageiro.keys()
     )
 
-    if campos_ausentes: #verifica campos ausentes
+    if campos_ausentes:
         raise ValueError(
-            f"Campos obrigatórios ausentes: "
+            "Campos obrigatórios ausentes: "
             f"{sorted(campos_ausentes)}"
         )
 
-    if dados_passageiro["Pclass"] not in {1, 2, 3}: #verifica se a classe informada existe
+    if dados_passageiro["Pclass"] not in {1, 2, 3}:
         raise ValueError(
             "Pclass deve ser 1, 2 ou 3."
         )
 
-    if dados_passageiro["Sex"] not in {"male", "female"}: #verifica o gênero
+    if dados_passageiro["Sex"] not in {"male", "female"}:
         raise ValueError(
             "Sex deve ser 'male' ou 'female'."
         )
 
-    if dados_passageiro["Embarked"] not in {"S", "C", "Q"}: #verifica onde o passageiro embarcou
+    if dados_passageiro["Embarked"] not in {"S", "C", "Q"}:
         raise ValueError(
             "Embarked deve ser 'S', 'C' ou 'Q'."
         )
 
     idade = dados_passageiro["Age"]
 
-    if not isinstance(idade, (int, float)): #verifica se a idade é um número
+    if not isinstance(idade, (int, float)):
         raise TypeError(
             "Age deve ser um número."
         )
@@ -106,19 +119,23 @@ def prever_passageiro(dados_passageiro: dict) -> dict:
         )
 
     passageiro = pd.DataFrame([dados_passageiro])
-
     passageiro = criar_atributos(passageiro)
 
-    previsao = pipeline_modelo.predict(passageiro)[0]
+    pipeline_modelo = carregar_modelo()
+
+    previsao = pipeline_modelo.predict(
+        passageiro
+    )[0]
 
     probabilidades = pipeline_modelo.predict_proba(
         passageiro
     )[0]
 
-    if previsao == 1:
-        resultado = "Sobreviveu"
-    else:
-        resultado = "Não sobreviveu"
+    resultado = (
+        "Sobreviveu"
+        if previsao == 1
+        else "Não sobreviveu"
+    )
 
     return {
         "classe": int(previsao),
@@ -149,15 +166,15 @@ if __name__ == "__main__":
 
     print(
         "\nResultado:",
-        resultado_previsao["resultado"]
+        resultado_previsao["resultado"],
     )
 
     print(
         "Probabilidade de não sobreviver:",
-        f"{resultado_previsao['probabilidade_nao_sobreviver']:.2%}"
+        f"{resultado_previsao['probabilidade_nao_sobreviver']:.2%}",
     )
 
     print(
         "Probabilidade de sobreviver:",
-        f"{resultado_previsao['probabilidade_sobreviver']:.2%}"
+        f"{resultado_previsao['probabilidade_sobreviver']:.2%}",
     )
