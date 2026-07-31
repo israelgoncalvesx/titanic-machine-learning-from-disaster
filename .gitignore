@@ -50,10 +50,12 @@ data/interim/
 datasets/
 
 # Modelos treinados e artefatos de Machine Learning
-models/
+models/*
+!models/titanic_pipeline.joblib
 *.pkl
 *.pickle
 *.joblib
+!models/titanic_pipeline.joblib
 *.h5
 *.keras
 *.pt
