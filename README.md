@@ -7,24 +7,33 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-009688)
 ![Pytest](https://img.shields.io/badge/Pytest-6%20passed-0A9EDC)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED)
-![Status](https://img.shields.io/badge/Status-em%20desenvolvimento-yellow)
+
+[![Streamlit deployment check](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/streamlit-check.yml/badge.svg)](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/streamlit-check.yml)
+[![Docker API validation](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/docker-api-check.yml/badge.svg)](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/docker-api-check.yml)
 
 Projeto de portfólio baseado no desafio **Titanic: Machine Learning from Disaster**, desenvolvido para praticar Análise de Dados, Machine Learning e conceitos de Machine Learning Engineering.
 
-O projeto evoluiu de notebooks exploratórios para uma solução organizada com pipeline treinado, função de inferência, interface Streamlit, API FastAPI, testes automatizados e preparação para execução em contêiner Docker.
+O projeto evoluiu de notebooks exploratórios para uma solução com pipeline treinado, função de inferência reutilizável, interface Streamlit, API FastAPI, testes automatizados, contêiner Docker e integração contínua.
 
-## Aplicação publicada
+## Aplicações
 
-A interface Streamlit está disponível no Streamlit Community Cloud:
+### Interface Streamlit publicada
 
-### [Acessar a aplicação Titanic ML](https://titanic-ml-israel.streamlit.app)
+[Acessar a aplicação Titanic ML](https://titanic-ml-israel.streamlit.app)
 
-A aplicação possui duas páginas:
+A interface possui:
 
-- **Previsão de sobrevivência:** recebe os dados de um passageiro e apresenta a classe prevista e as probabilidades estimadas pelo modelo;
-- **Dashboard:** permite explorar os dados com filtros, indicadores e gráficos dinâmicos.
+- formulário para previsão de sobrevivência;
+- probabilidades produzidas pelo modelo;
+- dashboard com filtros, indicadores e gráficos dinâmicos.
 
-> A interface Streamlit está publicada. A API FastAPI ainda é executada localmente e não possui um endereço público.
+### API FastAPI
+
+A API está pronta para publicação por meio de um Blueprint do Render:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster)
+
+O botão utiliza o arquivo `render.yaml` presente na raiz do repositório. A criação do serviço requer autorização do proprietário da conta Render para acessar o GitHub.
 
 ## Objetivo
 
@@ -32,23 +41,24 @@ O projeto busca responder à seguinte pergunta:
 
 > **Com base nas características de um passageiro, é possível prever se ele sobreviveu ao Titanic?**
 
-Além da previsão, o projeto foi utilizado para praticar:
+Também foram praticados:
 
 - análise exploratória e preparação de dados;
 - engenharia de atributos;
 - tratamento de valores ausentes;
 - codificação de variáveis categóricas;
 - treinamento e avaliação de modelos;
-- criação de um pipeline reproduzível;
+- pipeline reproduzível com Scikit-learn;
 - persistência do modelo com Joblib;
 - separação entre treinamento e inferência;
-- criação de interface com Streamlit;
-- disponibilização do modelo por meio de uma API REST;
-- validação de dados com Pydantic;
+- interface de usuário com Streamlit;
+- API REST com FastAPI e Pydantic;
 - testes automatizados com Pytest;
-- preparação da API para execução com Docker.
+- conteinerização com Docker;
+- integração contínua com GitHub Actions;
+- preparação de deploy com Render Blueprint.
 
-## Arquitetura atual
+## Arquitetura
 
 ```text
 Dados do Titanic
@@ -68,16 +78,18 @@ src.predict.prever_passageiro()
  ┌───────────────┴───────────────┐
  ↓                               ↓
 Streamlit                     FastAPI
-Interface para pessoas        API para outros sistemas
+Interface para pessoas        API para sistemas
                                  ↓
                               Pytest
-                       Testes automatizados
                                  ↓
                               Docker
-                    Empacotamento da API
+                                 ↓
+                         GitHub Actions
+                                 ↓
+                              Render
 ```
 
-A função `prever_passageiro()` concentra a lógica de inferência e é reutilizada pelo Streamlit e pela FastAPI. Dessa forma, o projeto evita manter duas implementações diferentes para a mesma previsão.
+A função `prever_passageiro()` concentra a inferência e é reutilizada pelo Streamlit e pela FastAPI. Isso evita duplicar o tratamento de dados e as regras de previsão.
 
 ## Fonte dos dados
 
@@ -90,44 +102,39 @@ Os dados foram obtidos no Kaggle:
 | `train.csv` | Treinamento, avaliação e dashboard |
 | `test.csv` | Geração de previsões para submissão no Kaggle |
 
-Para executar o treinamento localmente, coloque os arquivos em:
+Para treinar o modelo localmente, coloque os arquivos em:
 
 ```text
 data/train.csv
 data/test.csv
 ```
 
-Os CSVs não são versionados no repositório. Quando `data/train.csv` não está disponível, o dashboard utiliza uma cópia pública do conjunto de dados para continuar funcionando no deploy.
+Os CSVs não são versionados. Quando `data/train.csv` não está disponível, o dashboard utiliza uma cópia pública do conjunto de dados.
 
-## Principais variáveis
+## Variáveis utilizadas
 
 | Variável | Descrição |
 |---|---|
-| `Survived` | Indica se o passageiro sobreviveu |
 | `Pclass` | Classe da passagem |
 | `Sex` | Sexo registrado |
 | `Age` | Idade |
-| `SibSp` | Quantidade de irmãos, irmãs ou cônjuges a bordo |
-| `Parch` | Quantidade de pais ou filhos a bordo |
-| `Fare` | Valor pago pela passagem |
+| `SibSp` | Irmãos, irmãs ou cônjuges a bordo |
+| `Parch` | Pais ou filhos a bordo |
+| `Fare` | Valor da passagem |
 | `Embarked` | Porto de embarque |
 
-## Engenharia de atributos
-
-Foram criadas duas características adicionais:
+### Engenharia de atributos
 
 | Atributo | Descrição |
 |---|---|
-| `FamilySize` | Quantidade total de pessoas da família, incluindo o passageiro |
+| `FamilySize` | Total de pessoas da família, incluindo o passageiro |
 | `IsAlone` | Indica se o passageiro viajava sozinho |
-
-O tamanho da família é calculado por:
 
 ```python
 FamilySize = SibSp + Parch + 1
 ```
 
-Essas transformações ficam em `src/features.py` e são reutilizadas durante o treinamento e a inferência.
+As transformações ficam em `src/features.py` e são utilizadas tanto no treinamento quanto na inferência.
 
 ## Pré-processamento
 
@@ -140,9 +147,9 @@ Essas transformações ficam em `src/features.py` e são reutilizadas durante o 
 - `FamilySize`;
 - `IsAlone`.
 
-Tratamentos aplicados:
+Tratamentos:
 
-- `SimpleImputer` com a mediana;
+- `SimpleImputer` com mediana;
 - `StandardScaler`.
 
 ### Variáveis categóricas
@@ -151,31 +158,31 @@ Tratamentos aplicados:
 - `Sex`;
 - `Embarked`.
 
-Tratamentos aplicados:
+Tratamentos:
 
-- `SimpleImputer` com a categoria mais frequente;
+- `SimpleImputer` com categoria mais frequente;
 - `OneHotEncoder`.
 
-O pré-processamento e o modelo são reunidos em um único objeto `Pipeline` do Scikit-learn.
+O pré-processamento e a Regressão Logística são reunidos em um único `Pipeline`.
 
-## Modelo e resultados
+## Resultados do modelo
 
-O modelo inicial é uma **Regressão Logística**, treinada com 80% dos dados e validada com os 20% restantes. A divisão utiliza `stratify=y` para preservar a proporção das classes.
+A Regressão Logística foi treinada com 80% dos dados e avaliada com os 20% restantes, usando `stratify=y`.
 
-A acurácia obtida no conjunto de validação foi de **81,56%**, em 179 passageiros.
+Acurácia no conjunto de validação: **81,56%**, em 179 passageiros.
 
 | Classe | Precision | Recall | F1-score | Registros |
 |---|---:|---:|---:|---:|
 | Não sobreviveu | 0,82 | 0,90 | 0,86 | 110 |
 | Sobreviveu | 0,81 | 0,68 | 0,74 | 69 |
 
-O modelo apresentou maior facilidade para identificar passageiros que não sobreviveram. O principal ponto de melhoria é o recall da classe dos sobreviventes.
+O principal ponto de melhoria é o recall da classe dos sobreviventes.
 
 ### Matriz de confusão
 
 ![Matriz de confusão do modelo](images/matriz_de_confusao.png)
 
-O pipeline treinado é armazenado em:
+O pipeline treinado fica em:
 
 ```text
 models/titanic_pipeline.joblib
@@ -183,55 +190,39 @@ models/titanic_pipeline.joblib
 
 ## Interface Streamlit
 
-O arquivo principal da aplicação é:
+Arquivo principal:
 
 ```text
 app/streamlit_app.py
 ```
 
-A interface permite informar:
-
-- classe da passagem;
-- sexo;
-- idade;
-- quantidade de irmãos, irmãs ou cônjuges;
-- quantidade de pais ou filhos;
-- valor da passagem;
-- porto de embarque.
-
-Ao selecionar **Realizar previsão**, a aplicação valida os dados, cria os atributos derivados, aplica o pipeline e exibe a classe prevista e as probabilidades.
-
-## Dashboard interativo
-
-A página do dashboard está em:
+Dashboard:
 
 ```text
 app/pages/1_Dashboard.py
 ```
 
-O dashboard possui filtros por sexo, classe, porto de embarque e idade, além de indicadores, gráficos dinâmicos e uma tabela com os dados filtrados.
+A interface recebe os dados do passageiro, valida os valores, cria os atributos derivados, aplica o pipeline e exibe a classe e as probabilidades previstas.
 
 ## API FastAPI
 
-A API está implementada em:
+Arquivo principal:
 
 ```text
 api/main.py
 ```
 
-Ela permite que outros programas utilizem o modelo por meio de requisições HTTP e respostas em JSON.
-
-### Rotas disponíveis
+### Rotas
 
 | Método | Rota | Finalidade |
 |---|---|---|
-| `GET` | `/` | Informações básicas e status da API |
-| `GET` | `/health` | Verificação de saúde da aplicação |
-| `POST` | `/predict` | Realiza uma previsão de sobrevivência |
-| `GET` | `/docs` | Documentação Swagger interativa |
-| `GET` | `/redoc` | Documentação alternativa ReDoc |
+| `GET` | `/` | Informações básicas e status |
+| `GET` | `/health` | Verificação de saúde |
+| `POST` | `/predict` | Previsão de sobrevivência |
+| `GET` | `/docs` | Documentação Swagger |
+| `GET` | `/redoc` | Documentação ReDoc |
 
-### Dados esperados em `/predict`
+### Entrada de `/predict`
 
 ```json
 {
@@ -245,7 +236,7 @@ Ela permite que outros programas utilizem o modelo por meio de requisições HTT
 }
 ```
 
-### Exemplo de resposta
+### Resposta de exemplo
 
 ```json
 {
@@ -256,34 +247,21 @@ Ela permite que outros programas utilizem o modelo por meio de requisições HTT
 }
 ```
 
-Os valores podem apresentar mais casas decimais. As probabilidades representam a estimativa do modelo para os dados enviados.
-
-### Validações da API
-
-A API rejeita automaticamente entradas como:
-
-- idade menor que 0 ou maior que 120;
-- classe diferente de 1, 2 ou 3;
-- sexo diferente de `male` ou `female`;
-- porto diferente de `S`, `C` ou `Q`;
-- tarifa negativa;
-- quantidades negativas em `SibSp` e `Parch`;
-- campos obrigatórios ausentes;
-- campos adicionais não previstos no esquema.
+A API rejeita automaticamente campos ausentes, campos extras, valores negativos e categorias fora dos valores aceitos.
 
 ## Testes automatizados
 
-Os testes estão em:
+Arquivo:
 
 ```text
 tests/test_api.py
 ```
 
-Foram implementados seis testes:
+Os seis testes verificam:
 
-1. resposta da rota inicial;
-2. resposta da rota de saúde;
-3. previsão válida e probabilidades;
+1. rota inicial;
+2. rota de saúde;
+3. previsão válida;
 4. rejeição de idade negativa;
 5. rejeição de classe inválida;
 6. rejeição de campo adicional.
@@ -294,24 +272,107 @@ Resultado confirmado localmente com Python 3.13.7:
 6 passed
 ```
 
-Os avisos apresentados pelas dependências durante a execução não causaram falha nos testes.
+Execução:
+
+```bash
+python -m pytest -v
+```
+
+A API não precisa estar aberta para o `TestClient` executar os testes.
 
 ## Docker
 
-O projeto possui:
+Arquivos:
 
 ```text
 Dockerfile
 .dockerignore
 ```
 
-O `Dockerfile` utiliza Python 3.13 em uma imagem reduzida, instala as dependências, copia a API, o código de inferência e o modelo treinado, expõe a porta 8000 e inicia o Uvicorn.
+O contêiner:
 
-O contêiner também possui uma verificação de saúde baseada na rota `/health`.
+- utiliza `python:3.13-slim`;
+- instala as dependências;
+- copia a API, o código de inferência e o modelo;
+- aceita a variável de ambiente `PORT`;
+- inicia o Uvicorn em `0.0.0.0`;
+- possui `HEALTHCHECK` baseado em `/health`.
 
-> O Dockerfile já foi criado. A construção da imagem e a execução do contêiner ainda precisam ser confirmadas localmente.
+### Construção local
 
-## Como executar localmente
+```bash
+docker build -t titanic-api .
+```
+
+### Execução local
+
+```bash
+docker run --rm -p 8000:8000 --name titanic-api titanic-api
+```
+
+Acesse:
+
+```text
+http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+```
+
+## Integração contínua
+
+### Validação do Streamlit
+
+```text
+.github/workflows/streamlit-check.yml
+```
+
+Verifica sintaxe, carregamento do modelo, fonte de dados do dashboard e inicialização do Streamlit.
+
+### Validação da API Docker
+
+```text
+.github/workflows/docker-api-check.yml
+```
+
+A cada alteração relevante, o GitHub Actions:
+
+1. constrói a imagem Docker;
+2. inicia o contêiner;
+3. aguarda a rota `/health` responder;
+4. envia uma requisição para `/predict`;
+5. valida as chaves e a soma das probabilidades;
+6. apresenta os logs e remove o contêiner de teste.
+
+O status atual pode ser consultado pelo badge **Docker API validation** no início deste README.
+
+## Deploy da API no Render
+
+A configuração está em:
+
+```text
+render.yaml
+```
+
+O Blueprint define:
+
+- serviço web público;
+- runtime Docker;
+- plano gratuito;
+- região `virginia`;
+- branch `main`;
+- health check em `/health`;
+- deploy após aprovação das verificações de CI.
+
+Para criar o serviço, clique no botão **Deploy to Render** no início do README, autorize o acesso ao GitHub, revise o Blueprint e confirme o deploy.
+
+Depois da publicação, os endereços terão esta estrutura:
+
+```text
+API:          https://<nome-do-servico>.onrender.com
+Documentação: https://<nome-do-servico>.onrender.com/docs
+Saúde:        https://<nome-do-servico>.onrender.com/health
+```
+
+## Execução local sem Docker
 
 ### 1. Clone o repositório
 
@@ -322,14 +383,14 @@ cd titanic-machine-learning-from-disaster
 
 ### 2. Crie o ambiente virtual
 
-No Windows com Python 3.13:
+Windows:
 
 ```powershell
 py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-No Linux ou macOS:
+Linux ou macOS:
 
 ```bash
 python3 -m venv .venv
@@ -343,117 +404,38 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### 4. Execute a aplicação Streamlit
+### 4. Execute o Streamlit
 
 ```bash
 python -m streamlit run app/streamlit_app.py
 ```
 
-Endereço local padrão:
-
-```text
-http://localhost:8501
-```
-
-### 5. Execute a API FastAPI
+### 5. Execute a API
 
 ```bash
 python -m uvicorn api.main:app --reload
 ```
 
-Endereços locais:
-
-```text
-API:          http://127.0.0.1:8000
-Documentação: http://127.0.0.1:8000/docs
-Saúde:        http://127.0.0.1:8000/health
-```
-
-### 6. Teste a API pelo PowerShell
-
-```powershell
-$passageiro = @{
-    Age = 29
-    SibSp = 0
-    Parch = 0
-    Fare = 80.0
-    Pclass = 1
-    Sex = "female"
-    Embarked = "C"
-} | ConvertTo-Json
-
-Invoke-RestMethod `
-    -Uri "http://127.0.0.1:8000/predict" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Body $passageiro
-```
-
-### 7. Execute os testes
-
-A API não precisa estar aberta para executar os testes:
-
-```bash
-python -m pytest -v
-```
-
-Resultado atual esperado:
-
-```text
-6 passed
-```
-
-### 8. Treine novamente o modelo
-
-Adicione os CSVs na pasta `data/` e execute:
+### 6. Treine novamente o modelo
 
 ```bash
 python -m src.train
 ```
 
-### 9. Execute uma previsão pelo terminal
+### 7. Execute uma previsão pelo terminal
 
 ```bash
 python -m src.predict
 ```
 
-## Como executar com Docker
-
-Com o Docker Desktop aberto, construa a imagem na raiz do projeto:
-
-```bash
-docker build -t titanic-api .
-```
-
-Execute o contêiner:
-
-```bash
-docker run --rm -p 8000:8000 --name titanic-api titanic-api
-```
-
-Depois acesse:
-
-```text
-http://127.0.0.1:8000/health
-http://127.0.0.1:8000/docs
-```
-
-Para interromper o contêiner em execução no terminal:
-
-```text
-Ctrl + C
-```
-
-Caso ele esteja sendo executado em segundo plano, utilize:
-
-```bash
-docker stop titanic-api
-```
-
-## Estrutura atual
+## Estrutura
 
 ```text
 titanic-machine-learning-from-disaster/
+├── .github/
+│   └── workflows/
+│       ├── docker-api-check.yml
+│       └── streamlit-check.yml
 ├── api/
 │   ├── __init__.py
 │   └── main.py
@@ -482,120 +464,80 @@ titanic-machine-learning-from-disaster/
 ├── .gitignore
 ├── Dockerfile
 ├── README.md
+├── render.yaml
 └── requirements.txt
 ```
 
-## Tecnologias utilizadas
+## Tecnologias
 
 - Python 3.13;
-- Pandas;
-- NumPy;
+- Pandas e NumPy;
 - Matplotlib;
 - Scikit-learn;
 - Joblib;
 - Streamlit;
-- FastAPI;
-- Pydantic;
-- Uvicorn;
-- Pytest;
-- HTTPX;
+- FastAPI, Pydantic e Uvicorn;
+- Pytest e HTTPX;
 - Docker;
+- GitHub Actions;
+- Render Blueprint;
 - Jupyter Notebook;
-- Git e GitHub;
-- Streamlit Community Cloud.
+- Git e GitHub.
 
-## Observações importantes
+## Observações e limitações
 
-- A previsão representa uma **estimativa estatística**, não uma certeza;
-- as probabilidades se referem ao passageiro informado e não à acurácia geral do modelo;
-- o modelo foi treinado com um conjunto de dados pequeno e histórico;
-- o projeto possui finalidade educacional e de portfólio;
-- o modelo pode reproduzir padrões e limitações dos dados de treinamento;
-- o desempenho de 81,56% foi medido no conjunto de validação deste projeto;
-- o resultado não deve ser interpretado como uma relação causal entre as variáveis e a sobrevivência.
-
-## Limitações atuais
-
-- O conjunto de dados é pequeno;
-- a coluna `Cabin` possui muitos valores ausentes;
-- o modelo utiliza apenas uma parte das informações disponíveis;
+- A previsão representa uma estimativa estatística, não uma certeza;
+- as probabilidades se referem ao passageiro enviado, não à acurácia geral;
+- o modelo foi treinado com um conjunto pequeno e histórico;
+- a aplicação tem finalidade educacional e de portfólio;
+- o modelo pode reproduzir limitações dos dados de treinamento;
 - o recall dos sobreviventes ainda pode ser melhorado;
-- a API ainda não está publicada em um servidor público;
-- a imagem Docker ainda precisa ser validada localmente;
-- os testes atuais estão concentrados nas rotas da API;
-- o desempenho no conjunto oficial de teste depende da avaliação do Kaggle.
+- os testes atuais se concentram na API;
+- o desempenho oficial no conjunto de teste depende da avaliação do Kaggle.
 
-## Checklist do projeto
+## Checklist
 
-### Fundamentos e análise de dados
+### Dados e modelo
 
-- [x] Criar o repositório e a estrutura inicial
-- [x] Configurar ambiente virtual e dependências
-- [x] Baixar os dados no Kaggle
-- [x] Carregar `train.csv` e `test.csv`
-- [x] Identificar tipos de dados e valores ausentes
-- [x] Verificar registros duplicados
-- [x] Produzir estatísticas descritivas
-- [x] Analisar sobrevivência por sexo, classe, idade e embarque
-- [x] Criar visualizações e interpretações
-
-### Modelo no Jupyter Notebook
-
-- [x] Definir `X` e `y`
-- [x] Criar `FamilySize` e `IsAlone`
-- [x] Separar dados de treino e validação
-- [x] Tratar valores ausentes
-- [x] Codificar variáveis categóricas
-- [x] Criar um pipeline com Scikit-learn
-- [x] Treinar uma Regressão Logística
-- [x] Avaliar o modelo
+- [x] Realizar análise exploratória
+- [x] Criar atributos derivados
+- [x] Criar pipeline de pré-processamento e modelo
+- [x] Avaliar a Regressão Logística
 - [x] Realizar validação cruzada
-- [x] Gerar previsões para o conjunto de teste
 - [x] Gerar `submission.csv`
+- [x] Salvar o pipeline com Joblib
 
-### Organização para Machine Learning Engineering
+### Aplicação e Machine Learning Engineering
 
-- [x] Criar o pacote `src/`
-- [x] Mover a engenharia de atributos para `src/features.py`
-- [x] Criar `src/train.py`
-- [x] Criar um pipeline reproduzível
-- [x] Salvar o pipeline treinado com Joblib
-- [x] Criar `src/predict.py`
-- [x] Carregar o pipeline salvo sem novo treinamento
-- [x] Gerar classe prevista e probabilidades
-- [x] Transformar a previsão em uma função reutilizável
-- [x] Validar os dados recebidos para previsão
-- [x] Criar uma interface interativa com Streamlit
-- [x] Criar um dashboard com filtros e gráficos dinâmicos
-- [x] Preparar dependências e caminhos para o deploy
-- [x] Publicar a aplicação no Streamlit Community Cloud
-- [x] Criar uma API com FastAPI
-- [x] Validar entradas da API com Pydantic
-- [x] Criar testes automatizados com Pytest
-- [x] Executar e aprovar os seis testes da API
-- [x] Criar um `Dockerfile`
-- [x] Criar um `.dockerignore`
-- [x] Documentar a execução da API
-- [x] Documentar a execução dos testes
-- [x] Documentar a execução com Docker
-- [ ] Construir e validar a imagem Docker localmente
-- [ ] Publicar a API em um serviço de nuvem
+- [x] Organizar o código em `src/`
+- [x] Criar função reutilizável de inferência
+- [x] Criar interface Streamlit
+- [x] Criar dashboard interativo
+- [x] Publicar o Streamlit Community Cloud
+- [x] Criar API FastAPI
+- [x] Validar entradas com Pydantic
+- [x] Criar e aprovar seis testes com Pytest
+- [x] Criar `Dockerfile` e `.dockerignore`
+- [x] Configurar validação automatizada do Docker
+- [x] Testar `/health` e `/predict` no workflow
+- [x] Preparar o deploy no Render com `render.yaml`
+- [ ] Autorizar a criação do serviço no Render
+- [ ] Registrar no README a URL pública da API
 
 ### Melhorias opcionais
 
-- [ ] Comparar Regressão Logística, Árvore de Decisão e Random Forest
-- [ ] Ajustar hiperparâmetros com validação cruzada
+- [ ] Comparar outros algoritmos
+- [ ] Ajustar hiperparâmetros
 - [ ] Extrair títulos da coluna `Name`
-- [ ] Investigar informações de `Cabin` e `Ticket`
-- [ ] Analisar a importância das características
-- [ ] Registrar o resultado obtido no Kaggle
+- [ ] Investigar `Cabin` e `Ticket`
+- [ ] Analisar importância das características
 - [ ] Adicionar testes unitários para `src/features.py`
 - [ ] Adicionar testes unitários para `src/predict.py`
-- [ ] Configurar integração contínua para executar o Pytest
+- [ ] Registrar o resultado obtido no Kaggle
 
 ## Transparência sobre o uso de Inteligência Artificial
 
-Este projeto foi desenvolvido com o auxílio de ferramentas de Inteligência Artificial, utilizadas para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação.
+Este projeto foi desenvolvido com auxílio de ferramentas de Inteligência Artificial para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação.
 
 O código é executado, estudado e revisado pelo autor. As decisões, interpretações e conclusões são verificadas durante o processo de aprendizagem.
 
