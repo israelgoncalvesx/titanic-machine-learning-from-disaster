@@ -1,0 +1,127 @@
+name: Docker API validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "src/**"
+      - "models/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "requirements.txt"
+      - ".github/workflows/docker-api-check.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "src/**"
+      - "models/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "requirements.txt"
+      - ".github/workflows/docker-api-check.yml"
+  workflow_dispatch:
+
+jobs:
+  validate-docker-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build --tag titanic-api:test .
+
+      - name: Start API container
+        run: |
+          docker run \
+            --detach \
+            --name titanic-api-test \
+            --publish 8000:8000 \
+            titanic-api:test
+
+      - name: Wait for health endpoint
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error \
+              http://127.0.0.1:8000/health; then
+              echo
+              echo "API container is healthy."
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          echo "The API did not become healthy in time."
+          docker logs titanic-api-test
+          exit 1
+
+      - name: Test prediction endpoint
+        run: |
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{
+              "Age": 29,
+              "SibSp": 0,
+              "Parch": 0,
+              "Fare": 80.0,
+              "Pclass": 1,
+              "Sex": "female",
+              "Embarked": "C"
+            }' \
+            http://127.0.0.1:8000/predict \
+            --output prediction-response.json
+
+          python - <<'PY'
+          import json
+
+          with open(
+              "prediction-response.json",
+              encoding="utf-8",
+          ) as response_file:
+              response = json.load(response_file)
+
+          required_keys = {
+              "classe",
+              "resultado",
+              "probabilidade_nao_sobreviver",
+              "probabilidade_sobreviver",
+          }
+
+          missing_keys = required_keys - response.keys()
+
+          if missing_keys:
+              raise RuntimeError(
+                  f"Missing response keys: {sorted(missing_keys)}"
+              )
+
+          probability_sum = (
+              response["probabilidade_nao_sobreviver"]
+              + response["probabilidade_sobreviver"]
+          )
+
+          if abs(probability_sum - 1.0) > 1e-6:
+              raise RuntimeError(
+                  "Prediction probabilities do not sum to 1."
+              )
+
+          print(json.dumps(response, indent=2, ensure_ascii=False))
+          PY
+
+      - name: Show container health
+        run: |
+          docker inspect \
+            --format='{{json .State.Health}}' \
+            titanic-api-test
+
+      - name: Show API logs
+        if: always()
+        run: docker logs titanic-api-test || true
+
+      - name: Remove test container
+        if: always()
+        run: docker rm --force titanic-api-test || true
