@@ -570,17 +570,6 @@ titanic-machine-learning-from-disaster/
 - [x] Validar a resposta da API publicada
 - [x] Registrar a URL pública no README
 
-### Melhorias opcionais
-
-- [ ] Comparar outros algoritmos
-- [ ] Ajustar hiperparâmetros
-- [ ] Extrair títulos da coluna `Name`
-- [ ] Investigar `Cabin` e `Ticket`
-- [ ] Analisar importância das características
-- [ ] Adicionar testes unitários para `src/features.py`
-- [ ] Adicionar testes unitários para `src/predict.py`
-- [ ] Registrar o resultado obtido no Kaggle
-
 ## Transparência sobre o uso de Inteligência Artificial
 
 Este projeto foi desenvolvido com auxílio de ferramentas de Inteligência Artificial para esclarecer dúvidas, revisar conceitos, organizar etapas e melhorar a documentação.
