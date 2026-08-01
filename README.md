@@ -7,19 +7,20 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-009688)
 ![Pytest](https://img.shields.io/badge/Pytest-6%20passed-0A9EDC)
 ![Docker](https://img.shields.io/badge/Docker-Container-2496ED)
+![Status](https://img.shields.io/badge/Status-conclu%C3%ADdo-success)
 
 [![Streamlit deployment check](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/streamlit-check.yml/badge.svg)](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/streamlit-check.yml)
 [![Docker API validation](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/docker-api-check.yml/badge.svg)](https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster/actions/workflows/docker-api-check.yml)
 
 Projeto de portfólio baseado no desafio **Titanic: Machine Learning from Disaster**, desenvolvido para praticar Análise de Dados, Machine Learning e conceitos de Machine Learning Engineering.
 
-O projeto evoluiu de notebooks exploratórios para uma solução com pipeline treinado, função de inferência reutilizável, interface Streamlit, API FastAPI, testes automatizados, contêiner Docker e integração contínua.
+O projeto evoluiu de notebooks exploratórios para uma solução completa com pipeline treinado, função de inferência reutilizável, interface Streamlit, API FastAPI, testes automatizados, contêiner Docker, integração contínua e deploy em nuvem.
 
-## Aplicações
+## Aplicações publicadas
 
-### Interface Streamlit publicada
+### Interface Streamlit
 
-[Acessar a aplicação Titanic ML](https://titanic-ml-israel.streamlit.app)
+[**Acessar a aplicação Titanic ML**](https://titanic-ml-israel.streamlit.app)
 
 A interface possui:
 
@@ -29,15 +30,29 @@ A interface possui:
 
 ### API FastAPI
 
-A API está pronta para publicação por meio de um Blueprint do Render:
+[**Acessar a API publicada no Render**](https://titanic-ml-api-israel.onrender.com)
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/israelgoncalvesx/titanic-machine-learning-from-disaster)
+Links principais:
 
-O botão utiliza o arquivo `render.yaml` presente na raiz do repositório. A criação do serviço requer autorização do proprietário da conta Render para acessar o GitHub.
+- [Documentação Swagger](https://titanic-ml-api-israel.onrender.com/docs)
+- [Documentação ReDoc](https://titanic-ml-api-israel.onrender.com/redoc)
+- [Health check](https://titanic-ml-api-israel.onrender.com/health)
+
+A rota principal da API foi validada após o deploy e retornou:
+
+```json
+{
+  "mensagem": "Titanic Survival Prediction API",
+  "documentacao": "/docs",
+  "status": "online"
+}
+```
+
+> O serviço utiliza o plano gratuito do Render e pode levar alguns instantes para responder após um período de inatividade.
 
 ## Objetivo
 
-O projeto busca responder à seguinte pergunta:
+O projeto busca responder à pergunta:
 
 > **Com base nas características de um passageiro, é possível prever se ele sobreviveu ao Titanic?**
 
@@ -56,7 +71,7 @@ Também foram praticados:
 - testes automatizados com Pytest;
 - conteinerização com Docker;
 - integração contínua com GitHub Actions;
-- preparação de deploy com Render Blueprint.
+- deploy com Render Blueprint.
 
 ## Arquitetura
 
@@ -79,8 +94,8 @@ src.predict.prever_passageiro()
  ↓                               ↓
 Streamlit                     FastAPI
 Interface para pessoas        API para sistemas
-                                 ↓
-                              Pytest
+ ↓                               ↓
+Streamlit Cloud              Pytest
                                  ↓
                               Docker
                                  ↓
@@ -89,7 +104,7 @@ Interface para pessoas        API para sistemas
                               Render
 ```
 
-A função `prever_passageiro()` concentra a inferência e é reutilizada pelo Streamlit e pela FastAPI. Isso evita duplicar o tratamento de dados e as regras de previsão.
+A função `prever_passageiro()` concentra a inferência e é reutilizada pelo Streamlit e pela FastAPI. Isso evita duplicar o tratamento dos dados e as regras de previsão.
 
 ## Fonte dos dados
 
@@ -212,6 +227,12 @@ Arquivo principal:
 api/main.py
 ```
 
+URL base:
+
+```text
+https://titanic-ml-api-israel.onrender.com
+```
+
 ### Rotas
 
 | Método | Rota | Finalidade |
@@ -248,6 +269,26 @@ api/main.py
 ```
 
 A API rejeita automaticamente campos ausentes, campos extras, valores negativos e categorias fora dos valores aceitos.
+
+### Testar a API publicada pelo PowerShell
+
+```powershell
+$passageiro = @{
+    Age = 29
+    SibSp = 0
+    Parch = 0
+    Fare = 80.0
+    Pclass = 1
+    Sex = "female"
+    Embarked = "C"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "https://titanic-ml-api-israel.onrender.com/predict" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $passageiro
+```
 
 ## Testes automatizados
 
@@ -298,6 +339,8 @@ O contêiner:
 - inicia o Uvicorn em `0.0.0.0`;
 - possui `HEALTHCHECK` baseado em `/health`.
 
+A imagem foi construída e executada durante o processo de deploy no Render. A resposta pública da API confirmou o funcionamento do contêiner em nuvem.
+
 ### Construção local
 
 ```bash
@@ -342,11 +385,11 @@ A cada alteração relevante, o GitHub Actions:
 5. valida as chaves e a soma das probabilidades;
 6. apresenta os logs e remove o contêiner de teste.
 
-O status atual pode ser consultado pelo badge **Docker API validation** no início deste README.
+O status pode ser consultado pelo badge **Docker API validation** no início do README.
 
 ## Deploy da API no Render
 
-A configuração está em:
+A configuração de infraestrutura como código está em:
 
 ```text
 render.yaml
@@ -362,15 +405,15 @@ O Blueprint define:
 - health check em `/health`;
 - deploy após aprovação das verificações de CI.
 
-Para criar o serviço, clique no botão **Deploy to Render** no início do README, autorize o acesso ao GitHub, revise o Blueprint e confirme o deploy.
-
-Depois da publicação, os endereços terão esta estrutura:
+Serviço publicado:
 
 ```text
-API:          https://<nome-do-servico>.onrender.com
-Documentação: https://<nome-do-servico>.onrender.com/docs
-Saúde:        https://<nome-do-servico>.onrender.com/health
+API:          https://titanic-ml-api-israel.onrender.com
+Documentação: https://titanic-ml-api-israel.onrender.com/docs
+Saúde:        https://titanic-ml-api-israel.onrender.com/health
 ```
+
+O Render acompanha o repositório e pode realizar novos deploys quando mudanças aprovadas são enviadas para a branch `main`.
 
 ## Execução local sem Docker
 
@@ -513,16 +556,19 @@ titanic-machine-learning-from-disaster/
 - [x] Criar função reutilizável de inferência
 - [x] Criar interface Streamlit
 - [x] Criar dashboard interativo
-- [x] Publicar o Streamlit Community Cloud
+- [x] Publicar no Streamlit Community Cloud
 - [x] Criar API FastAPI
 - [x] Validar entradas com Pydantic
 - [x] Criar e aprovar seis testes com Pytest
 - [x] Criar `Dockerfile` e `.dockerignore`
 - [x] Configurar validação automatizada do Docker
 - [x] Testar `/health` e `/predict` no workflow
-- [x] Preparar o deploy no Render com `render.yaml`
-- [ ] Autorizar a criação do serviço no Render
-- [ ] Registrar no README a URL pública da API
+- [x] Preparar o deploy com `render.yaml`
+- [x] Criar o serviço pelo Render Blueprint
+- [x] Construir e executar o contêiner no Render
+- [x] Publicar a API em um endereço público
+- [x] Validar a resposta da API publicada
+- [x] Registrar a URL pública no README
 
 ### Melhorias opcionais
 
