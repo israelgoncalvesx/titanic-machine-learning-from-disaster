@@ -31,6 +31,9 @@ jobs:
       - name: Test saved model prediction
         run: python -m src.predict
 
+      - name: Test Streamlit pages and prediction form
+        run: python -m pytest tests/test_streamlit.py -q
+
       - name: Check dashboard data source
         run: |
           python - <<'PY'
